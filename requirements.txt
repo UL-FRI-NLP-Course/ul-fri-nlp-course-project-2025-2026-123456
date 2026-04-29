@@ -1,0 +1,16 @@
+bs4
+requests
+sqlalchemy
+psycopg2-binary
+pydantic
+python-dotenv
+faiss-cpu
+PyMuPDF
+pdfplumber
+sentence-transformers
+transformers
+torch
+torchvision
+torchaudio
+accelerate
+bitsandbytes

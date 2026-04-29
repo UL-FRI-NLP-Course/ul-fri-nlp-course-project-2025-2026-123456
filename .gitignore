@@ -137,3 +137,8 @@ report/*.blg
 report/*.fdb_latexmk
 report/*.fls
 report/*.synctex.gz
+
+# Data files
+data/pdfs/
+data/vector_store/
+data/cars.db

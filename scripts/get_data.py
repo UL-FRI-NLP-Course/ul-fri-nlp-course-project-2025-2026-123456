@@ -5,14 +5,14 @@ import os
 # WEBSITE = "https://www.auto-brochures.com/audi.html"
 WEBSITE = "https://www.auto-brochures.com"  # Spletna stran, iz katere rabimo podatke
 BRANDS = ["audi", "mazda"]  # Seznam vseh znamk, za katere zelimo pdf
-# BRANDS = ["audi"]
 ONLY_RECENT = False  # Ce je True, potem downloadamo samo najnovejso letnico
 
 
 def get_data():
-
-    os.makedirs("data", exist_ok=True)
     ze_zloudan = []
+
+    for brand in BRANDS:
+        os.makedirs(f"data/pdfs/{brand}", exist_ok=True)
 
     for brand in BRANDS:
 
@@ -36,7 +36,9 @@ def get_data():
                 if ONLY_RECENT and avto in ze_zloudan:
                     continue
 
-                if os.path.exists("data/" + pdf_name):
+                pdf_path = f"data/pdfs/{brand}/{pdf_name}"
+
+                if os.path.exists(pdf_path):
                     continue
 
                 ze_zloudan.append(avto)
@@ -45,7 +47,7 @@ def get_data():
 
                 response = requests.get(href)
 
-                with open("data/" + pdf_name, "wb") as f:
+                with open(pdf_path, "wb") as f:
                     f.write(response.content)
 
                 # break
