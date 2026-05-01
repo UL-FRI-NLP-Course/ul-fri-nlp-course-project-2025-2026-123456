@@ -62,12 +62,15 @@ def retrieve_candidates(parsed_query, k=10):
 	context = []
 	for score, idx in zip(scores, ids):
 		meta = metadata[idx]
+		vehicle_label = f"{meta.get('brand', '')} {meta.get('model', '')} {meta.get('year', '')}".strip()
 		candidates.append({
 			"source": meta["source"],
+			"vehicle_label": vehicle_label,
 			"chunk_id": meta["chunk_id"],
 			"score": float(score),
 		})
 		# Load the actual chunk text
-		context.append(meta.get("text", f"Chunk {meta['chunk_id']} from {meta['source']}"))
+		chunk_text = meta.get("text", f"Chunk {meta['chunk_id']} from {meta['source']}")
+		context.append(f"[{vehicle_label}] {chunk_text}")
 
 	return candidates, context

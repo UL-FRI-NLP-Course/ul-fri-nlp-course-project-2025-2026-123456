@@ -17,11 +17,11 @@ def build_corpus(pdf_path):
     meta = []
     chunks = extract_chunks(pdf_path)
     pdf_name = os.path.basename(pdf_path)
-    split_1 = pdf_name.split()
-    brand = split_1.split("_")[0]
-    split_2 = split_1.split("_")
-    model = split_2[0]
-    year = split_2[1]
+    split = pdf_name.replace(".pdf", "").split("_")
+    brand = split[0]
+    model = split[1].split()[1:]
+    model = " ".join(model)
+    year = split[2]
     for i, c in enumerate(chunks):  
             meta.append({
                 "source": pdf_name,
@@ -46,15 +46,20 @@ def main():
     os.makedirs(VECTOR_STORE_DIR, exist_ok=True)
 
     print("\n[1] Chunking PDFs...")
+    all_chunks = []
+    all_meta = []
     for brand in os.listdir(PDF_ROOT):
         for pdf_file in glob(os.path.join(PDF_ROOT, brand, "*.pdf")):
-            print(f"  Processing: {pdf_file}")
+            pdf_name = os.path.basename(pdf_file)
+            print(f"  Processing: {pdf_name}")
             chunks, meta = build_corpus(pdf_file)
-            print(f"    Extracted {len(chunks)} chunks from {pdf_file}")
+            all_chunks.extend(chunks)
+            all_meta.extend(meta)
+            print(f"    Extracted {len(chunks)} chunks")
 
     print("\n[3] Computing embeddings...")
     print(f"  Using model: {SENTENCE_TRANSFORMER_MODEL}")
-    embeddings = embed(chunks)
+    embeddings = embed(all_chunks)
     embeddings = embeddings.astype("float32")
     embeddings = normalize_embeddings(embeddings)
     print(f"  Shape: {embeddings.shape}")
@@ -65,7 +70,7 @@ def main():
 
     print("\n[5] Saving index and metadata...")
     save_index(index, FAISS_INDEX_PATH)
-    save_metadata(meta, METADATA_PATH)
+    save_metadata(all_meta, METADATA_PATH)
     print(f"  Index saved to: {FAISS_INDEX_PATH}")
     print(f"  Metadata saved to: {METADATA_PATH}")
 

@@ -1,13 +1,6 @@
+# TODO - Improve ranking algorithm also include the response from llm 
+
 def rank_cars(cars, parsed_query):
-	"""Rank cars combining DB constraint matching + FAISS semantic scores.
-
-	Args:
-		cars: list of dicts with DB car data and optional 'faiss_score' key
-		parsed_query: dict from parser with constraints
-
-	Returns:
-		sorted list of cars with combined scores
-	"""
 	ranked = []
 
 	budget_max = parsed_query.get("budget_max")

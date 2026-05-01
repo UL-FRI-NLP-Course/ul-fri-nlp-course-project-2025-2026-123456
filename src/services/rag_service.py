@@ -2,31 +2,45 @@ from src.services.parser import parse_query
 from src.services.retrival import retrieve_candidates
 from src.services.ranking import rank_cars
 from src.services.llm import generate_response
-from src.db.queries import query_cars_by_constraints, cars_to_dicts
+from src.db.carapi_queries import (
+    query_carapi_by_constraints,
+    get_all_carapi_cars,
+    cars_to_dicts,
+)
+
+PERSONA = (
+    "You are a friendly, expert car salesperson. Give concise, practical advice "
+    "tailored to the user's needs. Mention tradeoffs and cite brief evidence "
+    "from the provided context when relevant."
+)
+
 
 def generate_prompt(query: str, parsed: dict, ranked: list, context: list):
-    persona = (
-        "You are a friendly, expert car salesperson. Give concise, practical advice "
-        "tailored to the user's needs. Mention tradeoffs and cite brief evidence "
-        "from the provided context when relevant."
-    )
-
     top_cars = ranked[:3]
     rec_text = "\n".join(
-        [f"- {c.get('make', '')} {c.get('model', '')} (score={c.get('score', 0):.2f})"
+        [f"- {c.get('make', '')} {c.get('model', '')} ({c.get('year', '')}) (score={c.get('score', 0):.2f})"
          for c in top_cars]
     )
 
     ctx_text = "\n---\n".join(context[:5]) if context else ""
 
     prompt = (
-        f"{persona}\n\nUser query: {query}\n\n"
+        f"{PERSONA}\n\nUser query: {query}\n\n"
         f"Top recommendations:\n{rec_text}\n\n"
-        f"Context snippets:\n{ctx_text}\n\n"
+        f"Context snippets (each snippet is tagged with the vehicle it belongs to):\n{ctx_text}\n\n"
         "Answer as a helpful car salesperson in ~150-300 words. Start with a 1-line summary."
     )
 
     return prompt
+
+
+def generate_raw_prompt(query: str):
+    return (
+        f"{PERSONA}\n\n"
+        f"User query: {query}\n\n"
+        "Answer as a helpful car salesperson in ~150-300 words. "
+        "Start with a 1-line summary."
+    )
 
 
 def handle_query(query: str):
@@ -34,7 +48,7 @@ def handle_query(query: str):
     parsed = parse_query(query)
 
     # Step 2: Query DB for cars matching constraints
-    db_cars = query_cars_by_constraints(parsed, limit=20)
+    db_cars = query_carapi_by_constraints(parsed, limit=20)
     db_cars_list = cars_to_dicts(db_cars)
 
     # Step 3: Retrieve FAISS context based on parsed query terms
@@ -51,9 +65,9 @@ def handle_query(query: str):
         # Normalize FAISS score to [0, 1]
         car["faiss_score"] = min(faiss_scores.get(source_key, 0.3), 1.0)
 
-    # If no DB matches, use FAISS candidates as fallback
+    # If no DB matches, broaden to the full CarAPI dataset.
     if not db_cars_list:
-        db_cars_list = candidates[:5]
+        db_cars_list = get_all_carapi_cars(limit=20)
 
     # Step 5: Rank combined results
     ranked = rank_cars(db_cars_list, parsed)
@@ -65,4 +79,13 @@ def handle_query(query: str):
     return {
         "recommendations": ranked[:3],
         "response": response
+    }
+
+
+def handle_query_raw_llm(query: str):
+    prompt = generate_raw_prompt(query)
+    response = generate_response(prompt)
+    return {
+        "recommendations": [],
+        "response": response,
     }

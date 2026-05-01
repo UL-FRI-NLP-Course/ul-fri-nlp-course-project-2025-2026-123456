@@ -140,5 +140,7 @@ report/*.synctex.gz
 
 # Data files
 data/pdfs/
+data/carapi/
 data/vector_store/
 data/cars.db
+data/carapi.db

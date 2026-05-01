@@ -1,5 +1,90 @@
 # Natural language processing course: `Conversational Recommender System for Vehicles`
 
+This is a conversational vehicle recommendation system for users who want practical car suggestions from natural-language queries. It combines structured filtering over a CarAPI-based SQLite database (for hard constraints such as budget, body type, seats, and fuel) with semantic brochure retrieval from a FAISS index, then uses an LLM to produce concise, grounded recommendations.
+
+### Run RAG Query Loop
+```bash
+python src/main.py
+```
+
+Then type queries like:
+```
+You: I am looking for a sporty coupe that wont break the bank
+```
+
+And the system responds:
+```
+Response:
+ Let me know if you need any clarification or have additional questions.
+
+Summary: For a sporty coupe that won't break the bank, the Ford Mustang, Toyota 86, and Mazda MX-5 are top recommendations. The Mustang offers a powerful engine and modern styling, while the Toyota 86 provides a fun-to-drive experience with excellent handling. The Mazda MX-5 stands out for its lightweight design, aggressive performance, and iconic status among enthusiasts. All three vehicles deliver on the promise of a sporty coupe without a hefty price tag.
+
+Tradeoffs include different levels of luxury features, fuel efficiency, and overall size. The Mustang may be slightly larger but offers more interior space and luxury features compared to the compact Toyota 86 and the smaller Mazda MX-5. The Mazda MX-5 sacrifices some comfort and cargo space for its lightweight, agile nature, making it ideal for enthusiasts seeking a true sports car
+
+Top Recommendations:
+  1. Ford Mustang
+
+  2. Toyota 86
+
+  3. Mazda MX-5
+```
+
+The system will:
+1. Embed your query
+2. Retrieve top-K chunks from FAISS
+3. Parse the query for keywords and specifications
+4. Fetch relevant vehicles from the database
+3. Rank candidates
+4. Generate a recommendation with LLM
+
+### Architecture
+
+The system has two information sources:
+
+1. **FAISS Vector Store** (from PDF brochures)
+   - Semantic similarity search
+   - Returns context snippets for LLM
+   - Scores based on embedding similarity
+
+2. **SQLite Structured Database** (from CarAPI)
+   - Hard constraints filtering (budget, fuel type, body style, seats, transmission)
+   - Car specifications (price, horsepower, safety rating, dimensions, etc.)
+   - Fast exact-match queries
+
+### Project Structure
+
+```
+src/
+├── main.py                   # RAG pipeline entry point
+├── config.py                 # Configuration + paths
+├── ingestion/
+│   ├── chunker.py            # Text chunking
+│   ├── embedder.py           # SentenceTransformers embeddings
+│   └── faiss_store.py        # FAISS utilities
+├── services/
+│   ├── rag_service.py        # RAG orchestration
+│   ├── retrival.py           # FAISS retrieval
+│   ├── llm.py                # Llama-2-7b generation
+│   ├── ranking.py            # Candidate ranking
+│   └── parser.py             # Query parsing
+└── db/
+    ├── database.py           # Structured DB connection
+    ├── carapi_schema.py      # Data schemas
+    └── carapi_queries.py     # Data querying
+
+
+scripts/
+├── get_carapi_stats.py       # Download car stats from CarAPI
+├── get_pdf_data.py           # Download pdf brochures
+├── ingest_carapi_stats.py    # One-time carapi stats ingestion
+└── ingest_pdfs.py            # One-time pdf ingestion
+
+data/
+├── carapi/                   # CarAPI stats
+├── pdfs/                     # Pdf brochures
+└── vector_store/             # FAISS index + metadata
+```
+
 ### Installation
 
 ```bash
@@ -34,9 +119,9 @@ data/pdfs/
 └── ...
 ```
 
-Use the provided `get_data.py` script to download sample brochures:
+Use the provided `get_pdf_data.py` script to download sample brochures:
 ```bash
-python scripts/get_data.py
+python scripts/get_pdf_data.py
 ```
 
 #### 2. Run Ingestion
@@ -49,102 +134,30 @@ Output:
 - `data/vector_store/index.faiss` - FAISS index
 - `data/vector_store/metadata.json` - Chunk metadata
 
-#### 3. Initialize Database & Load Sample Data
+#### 3. Prepare structured data
+
+Download car stats from the [CarAPI](https://carapi.app/) website.
+
+You must provide `CARAPI_TOKEN` and `CARAPI_SECRET` to `.env` file. 
 
 ```bash
-python3 scripts/load_cars.py
+python scripts/get_carapi_stats.py
 ```
 
 Output:
-- Creates `data/cars.db` (SQLite)
-- Loads cars from `data/cars.csv`
+- Downloads raw json data to `data/carapi/`
 
-### Run RAG Query Loop
+#### 4. Run Ingestion for structured DB
+This creates the `carapi.db` SQLite database. 
+
 ```bash
-python src/main.py
+python scripts/ingest_carapi_stats.py
 ```
 
-Then type queries like:
-```
-You: I need a fuel-efficient family car with good safety ratings
-```
+### Benchmark
+To benchmark the RAG system run the pipeline with `--raw-llm` argument which prompts the same LLM with the same persona and instructions, without the RAG functinality.
 
-The system will:
-1. Embed your query
-2. Retrieve top-K chunks from FAISS
-3. Rank candidates
-4. Generate a recommendation from Llama-2-7b-chat
-
-### Project Structure
-
-```
-src/
-├── main.py                   # RAG pipeline entry point
-├── config.py                 # Configuration + paths
-├── ingestion/
-│   ├── pdf_loader.py         # PDF extraction (PyMuPDF)
-│   ├── chunker.py            # Text chunking
-│   ├── embedder.py           # SentenceTransformers embeddings
-│   └── faiss_store.py        # FAISS utilities
-├── services/
-│   ├── rag_service.py        # RAG orchestration
-│   ├── retrival.py           # FAISS retrieval
-│   ├── llm.py                # Llama-2-7b generation
-│   ├── ranking.py            # Candidate ranking
-│   └── parser.py             # Query parsing
-└── db/
-    ├── database.py           # Future DB connection
-    ├── models.py             # Data models
-    └── queries.py            # Data querying
-
-
-scripts/
-├── add_cars_to_db.py         # Programmatically add cars to DB
-├── get_data.py               # Download pdf brochures
-├── ingest_pdfs.py            # One-time ingestion
-└── load_cars.py              # Load car data from CSV to DB
-
-data/
-├── pdfs/                     # Pdf brochures
-└── vector_store/             # FAISS index + metadata
+```bash
+python src/main.py --raw-llm
 ```
 
-### Architecture
-
-The system has two information sources:
-
-1. **FAISS Vector Store** (from PDF brochures)
-   - Semantic similarity search
-   - Returns context snippets for LLM
-   - Scores based on embedding similarity
-
-2. **SQLite Structured Database** (from CSV)
-   - Hard constraints filtering (budget, fuel type, body style, seats, transmission)
-   - Car specifications (price, horsepower, safety rating, dimensions, etc.)
-   - Fast exact-match queries
-
-### Database Schema
-
-**Table: `cars`**
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | Integer | Primary key |
-| brand | String | Car manufacturer (e.g., "Audi") |
-| model | String | Model name (e.g., "A4") |
-| price_min | Float | Minimum price (€) |
-| price_max | Float | Maximum price (€) |
-| fuel_type | String | "petrol", "diesel", "hybrid", "electric" |
-| body_type | String | "sedan", "suv", "hatchback", "wagon", "coupe" |
-| seats | Integer | Number of seats |
-| transmission | String | "manual", "automatic" |
-| horsepower | Integer | Engine power (hp) |
-| torque | Integer | Engine torque (Nm) |
-| fuel_consumption | Float | L/100km (0 for electric) |
-| co2_emissions | Float | g/km |
-| width, length, height | Float | Dimensions (mm) |
-| weight | Integer | Curb weight (kg) |
-| trunk_volume | Integer | Trunk/cargo space (L) |
-| has_awd | Boolean | All-wheel drive available |
-| safety_rating | Float | Euro NCAP rating (0-5) |
-| year | Integer | Model year |

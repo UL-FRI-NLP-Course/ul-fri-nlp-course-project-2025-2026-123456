@@ -1,19 +1,21 @@
 import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from src.config import DATA_DIR
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.config import DB_URL
 
-# Use SQLite locally if no DB_URL provided
-db_url = DB_URL or "sqlite:///" + os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "cars.db"
-)
+from src.db.carapi_schema import Base
 
-engine = create_engine(db_url, echo=False)
+CARAPI_DB_URL = os.getenv("CARAPI_DB_URL") or "sqlite:///" + os.path.join(DATA_DIR, "carapi.db")
+engine = create_engine(CARAPI_DB_URL, echo=False)
+
 SessionLocal = sessionmaker(bind=engine)
 
 
 def init_db():
-    from src.db.models import Base
     Base.metadata.create_all(bind=engine)
 
 

@@ -14,15 +14,6 @@ def get_model(model_name: str = None):
     return _embed_model
 
 def embed(texts, model_name: str = None):
-    """Encode a list of texts into embeddings (numpy array).
-
-    Args:
-        texts: list[str]
-        model_name: optional model name override
-
-    Returns:
-        numpy.ndarray shape (n_texts, dim)
-    """
     model = get_model(model_name)
     emb = model.encode(texts, show_progress_bar=False, convert_to_numpy=True)
     return np.array(emb)

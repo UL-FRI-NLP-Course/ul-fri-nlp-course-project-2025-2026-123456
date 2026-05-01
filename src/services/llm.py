@@ -1,13 +1,9 @@
-import os
-from typing import List
-
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
 import torch
 
 from src.config import HF_LLM_MODEL, USE_8BIT_QUANTIZATION
 
 _generator = None
-
 
 def _get_generator():
     global _generator
@@ -17,23 +13,24 @@ def _get_generator():
     model_name = HF_LLM_MODEL
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    # Setup 8-bit quantization for Llama-2-7b on 4080
+    # Use 4-bit quantization on GPU to keep Qwen on VRAM instead of offloading to CPU.
     quantization_config = None
     if USE_8BIT_QUANTIZATION and torch.cuda.is_available():
         quantization_config = BitsAndBytesConfig(
-            load_in_8bit=True,
-            bnb_8bit_quant_type="nf4",
-            bnb_8bit_use_double_quant=True,
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=torch.float16,
         )
 
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         quantization_config=quantization_config,
         device_map="auto",
-        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+        dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
     )
 
-    # For Llama-2-chat, set pad token
+    # Qwen tokenizers often do not define a pad token; reuse EOS for generation.
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -41,21 +38,26 @@ def _get_generator():
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        device_map="auto",
     )
     return _generator
+
+
+def init_llm():
+    _get_generator()
+    print(f"LLM model '{HF_LLM_MODEL}' loaded successfully.")
 
 
 def generate_response(prompt: str) -> str:
     gen = _get_generator()
 
-    # Generate with lower max_new_tokens for Llama-2-7b to stay within VRAM
+    # Keep generation short enough for 7B-class models on a single consumer GPU.
     output = gen(
         prompt,
         max_new_tokens=200,
         do_sample=True,
         top_p=0.9,
         temperature=0.7,
-        pad_token_id=50256,
+        return_full_text=False,
+        pad_token_id=gen.tokenizer.eos_token_id,
     )
     return output[0]["generated_text"]
