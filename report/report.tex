@@ -99,11 +99,64 @@ In addition to the travel domain, CRS have been implemented in several other dom
 
 \section*{Methods}
 
-The proposed system is designed as a Conversational Recommender System (CRS) that integrates large language models (LLMs), structured data processing, and retrieval-augmented generation (RAG) to provide personalized vehicle recommendations through natural language interaction. The method begins with a natural language interface through which users describe their preferences and requirements. These inputs are processed by an LLM to extract structured representations of user intent, such as budget constraints, vehicle type, and qualitative preferences.
+The proposed system is designed as a Conversational Recommender System (CRS) that integrates large language models (LLMs), 
+structured data processing, and retrieval-augmented generation (RAG) to provide personalized vehicle recommendations through natural 
+language interaction. The method begins with a natural language interface through which users describe their preferences and requirements. 
+These inputs are processed by an LLM to extract structured representations of user intent, such as budget constraints, vehicle type, and qualitative preferences.
 
-The system then employs a dual data strategy. A structured database containing quantitative vehicle attributes (e.g., price, fuel consumption, engine specifications) is used to perform constraint-based filtering and reduce the candidate set. In parallel, a vector database built from unstructured sources from brochures and catalogs enables semantic retrieval of relevant contextual information. We will use Auto Catalog Archive \cite{autocatalogarchive} as our initial dataset. This website contains more than 55,000 car brochures that include many different car models. Each brochure provides technical specifications (like power, weight, range…), list of features (like type of wheel, roof rail, safety equipment…), and other promotional information. 
+The system then employs a dual data strategy. A structured database containing quantitative vehicle attributes (e.g., price, fuel consumption, engine specifications) 
+is used to perform constraint-based filtering and reduce the candidate set. In parallel, a vector database built from unstructured sources from brochures and 
+catalogs enables semantic retrieval of relevant contextual information. We will use Auto Catalog Archive \cite{autocatalogarchive} as our initial dataset. 
+This website contains more than 55,000 car brochures that include many different car models. Each brochure provides technical specifications 
+(like power, weight, range…), list of features (like type of wheel, roof rail, safety equipment…), and other promotional information. 
 
 
+\section*{Evaluation of a model}
+
+Evaluation ideas:
+
+\noindent
+\underline{Test if RAG is working well}
+
+\vspace{5pt}
+\noindent
+Build a small controlled dataset (10 very different cars), where only one is 
+meeting the requirements. Ask the system to recommend a car and check if 
+it picks only the valid one.
+
+
+\vspace{7pt}
+\noindent
+\underline{Compare CRS to other LLMs}
+
+\vspace{5pt}
+\noindent
+Another idea is also creating a few prompts, for which we find a set of suitable cars. Then 
+we compare the output of our CRS system and one another LLM (preferably one that doesn't have 
+access to web). Then we evaluate if the LLMs found any car from the set.
+
+
+\vspace{7pt}
+\noindent
+\underline{Compare CRS to some website}
+
+\vspace{5pt}
+\noindent
+Compare recommendation to some website (Carwow, Autotrader according to chatgpt) and compare for 
+the same requirements the models output, though it is
+subjective method of evaluation (hard to tell which model is better, no hard truth on this topic)
+
+\vspace{7pt}
+\noindent
+\underline{Advanced method - baseline filter model}
+
+\vspace{5pt}
+\noindent
+Ideally (but too complicated to implement in such short time) would be to create a basic 
+filtering system, and conmpare the outputs with what the LLM is offering. Again the idea wouldn't 
+be to show it is better output objectively but either it shows more option, or wilder choices, etc. 
+Especially if the requirements are not precise or not coherent between themselves 
+(for instance big car + low consumption + high acceleration)
 
 \subsection*{Equations}
 
