@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
 import torch
 
@@ -44,7 +47,7 @@ def _get_generator():
 
 def init_llm():
     _get_generator()
-    print(f"LLM model '{HF_LLM_MODEL}' loaded successfully.")
+    print(f"LLM model '{HF_LLM_MODEL}' loaded successfully.\n")
 
 
 def generate_response(prompt: str) -> str:

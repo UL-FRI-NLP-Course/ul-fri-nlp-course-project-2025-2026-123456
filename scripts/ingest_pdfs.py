@@ -1,27 +1,25 @@
 # Script to ingest PDF brochures, extract text, compute embeddings, and build FAISS index.
 import os
 import sys
+import re
 from glob import glob
 
-# Add project root to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
+from scripts.get_pdf_data import get_brand_model_year
 from src.ingestion.chunker import extract_chunks
 from src.ingestion.embedder import embed
 from src.ingestion.faiss_store import build_faiss_index, save_index, save_metadata
 from src.config import PDF_ROOT, VECTOR_STORE_DIR, FAISS_INDEX_PATH, METADATA_PATH, SENTENCE_TRANSFORMER_MODEL
 import numpy as np
 
-
 def build_corpus(pdf_path):
     meta = []
     chunks = extract_chunks(pdf_path)
     pdf_name = os.path.basename(pdf_path)
-    split = pdf_name.replace(".pdf", "").split("_")
-    brand = split[0]
-    model = split[1].split()[1:]
-    model = " ".join(model)
-    year = split[2]
+    brand, model, year = get_brand_model_year(pdf_name)
     for i, c in enumerate(chunks):  
             meta.append({
                 "source": pdf_name,
@@ -33,14 +31,6 @@ def build_corpus(pdf_path):
                 
             })
     return chunks, meta
-
-
-def normalize_embeddings(vecs):
-    """Normalize embeddings for cosine similarity (IP metric)."""
-    norms = np.linalg.norm(vecs, axis=1, keepdims=True)
-    norms[norms == 0] = 1
-    return vecs / norms
-
 
 def main():
     os.makedirs(VECTOR_STORE_DIR, exist_ok=True)
@@ -60,8 +50,6 @@ def main():
     print("\n[3] Computing embeddings...")
     print(f"  Using model: {SENTENCE_TRANSFORMER_MODEL}")
     embeddings = embed(all_chunks)
-    embeddings = embeddings.astype("float32")
-    embeddings = normalize_embeddings(embeddings)
     print(f"  Shape: {embeddings.shape}")
 
     print("\n[4] Building FAISS index...")

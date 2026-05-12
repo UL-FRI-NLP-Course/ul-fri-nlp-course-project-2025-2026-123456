@@ -23,13 +23,6 @@ def _load_index_and_metadata():
 	return _index, _metadata
 
 
-def normalize_embedding(vec):
-	norm = np.linalg.norm(vec)
-	if norm == 0:
-		return vec
-	return vec / norm
-
-
 def retrieve_candidates(parsed_query, k=10):
 	# Embed the parsed query as a richer text query
 	query_terms = []
@@ -51,9 +44,12 @@ def retrieve_candidates(parsed_query, k=10):
 	if not query_text:
 		query_text = "car recommendation"
 
-	query_emb = embed([query_text])[0]
+	print(f"Query text: {query_text}\n")
+
+	query = parsed_query.get("query", "")
+
+	query_emb = embed([query])[0]
 	query_emb = query_emb.astype("float32")
-	query_emb = normalize_embedding(query_emb)
 
 	index, metadata = _load_index_and_metadata()
 	scores, ids = search_index(index, query_emb, k=k)
@@ -72,5 +68,8 @@ def retrieve_candidates(parsed_query, k=10):
 		# Load the actual chunk text
 		chunk_text = meta.get("text", f"Chunk {meta['chunk_id']} from {meta['source']}")
 		context.append(f"[{vehicle_label}] {chunk_text}")
+
+	print(f"Candidates retrieved: {candidates}\n")
+	print(f"Context: {context}\n")
 
 	return candidates, context

@@ -1,15 +1,17 @@
 import argparse
 import os
 import sys
+import re
 import requests
 from bs4 import BeautifulSoup
+
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.config import PDF_ROOT
 
 # WEBSITE = "https://www.auto-brochures.com/audi.html"
 WEBSITE = "https://www.auto-brochures.com"  # Spletna stran, iz katere rabimo podatke
-BRANDS = ["toyota"]  # Seznam vseh znamk, za katere zelimo pdf
+BRANDS = ["audi", "bmw", "buick","cadillac", "chevrolet", "chrysler", "dodge", "ford", "honda", "hyundai", "infiniti", "jeep", "kia", "land rover", "lexus", "mazda", "mercedes-benz", "mini", "mitsubishi", "nissan", "porsche", "ram", "subaru", "toyota", "volkswagen", "volvo"]  # Seznam vseh znamk, za katere zelimo pdf
 ONLY_RECENT = False  # Ce je True, potem downloadamo samo najnovejso letnico
 MIN_YEAR = None  # Minimalna letnica za download (ce je None, potem downloadamo vse, -1 pomeni samo najnovejso) 
 
@@ -20,6 +22,20 @@ def download_pdf(url, save_path):
     response = requests.get(url)
     with open(save_path, "wb") as f:
         f.write(response.content)
+
+def get_model_year(pdf_name):
+    match = re.search(r'(\d{4})', pdf_name)
+    if match:
+        return int(match.groups()[-1])
+    return 0
+
+def get_brand_model_year(pdf_name):
+    split = pdf_name.replace(".pdf", "").split("_")
+    brand = split[0]
+    model = split[1].split()[1:]
+    model = " ".join(model)
+    year = get_model_year(pdf_name)
+    return brand, model, year
     
 
 def get_data(brands, min_year=None, only_latest=False):
@@ -46,12 +62,7 @@ def get_data(brands, min_year=None, only_latest=False):
                     download_pdf(href, f"{PDF_ROOT}/{brand}/{pdf_name}")
                     continue
 
-                split1 = pdf_name.split("_")
-                model_year = split1[-1].replace(".pdf", "")
-                model_year = model_year.split("-")[0]  # some BMWs have multiple versions
-                model_year = model_year.split(".")[0]  # some have dots in the year
-                model_year = int(model_year)
-                model = " ".join(split1[1].split()[1:])
+                brand, model, model_year = get_brand_model_year(pdf_name)
                 
                 if model not in dicti:
                     dicti[model] = []
@@ -100,13 +111,8 @@ def filter_data(brands, min_year=None, only_latest=False):
         dicti = {}
         for filename in os.listdir(brand_path):
             if filename.endswith(".pdf"):
-                split1 = filename.split("_")
-                model_year = split1[-1].replace(".pdf", "")
-                model_year = model_year.split("-")[0]
-                model_year = model_year.split(".")[0]
-                model_year = int(model_year)
-                model = " ".join(split1[1].split()[1:])
-                
+                brand, model, model_year = get_brand_model_year(filename)
+
                 if model not in dicti:
                     dicti[model] = []
 
@@ -115,15 +121,15 @@ def filter_data(brands, min_year=None, only_latest=False):
 
         # filter by year
         for model, versions in dicti.items():
-            keep_below = 9999
+            remove_below = 9999
             if min_year is not None:
-                keep_below = min_year
+                remove_below = min_year
 
             if only_latest:
                 latest_year = max(versions, key=lambda x: x[0])[0]
-                keep_below = min(latest_year, keep_below)
+                remove_below = max(latest_year, remove_below)
 
-            delete_versions = filter(lambda x: x[0] < keep_below, versions)
+            delete_versions = filter(lambda x: x[0] < remove_below, versions)
 
             for model_year, file_path in delete_versions:
                 pdf_name = os.path.basename(file_path)

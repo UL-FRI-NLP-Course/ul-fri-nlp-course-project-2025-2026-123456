@@ -21,7 +21,6 @@ def _row_to_car_dict(row):
         "horsepower": row["horsepower_hp"],
         "torque_nm": row["torque_nm"],
         "fuel_consumption_l_per_100km": row["combined_l_per_100km"],
-        "safety_rating": 4.0,
         "width_cm": row["width_cm"],
         "length_cm": row["length_cm"],
         "height_cm": row["height_cm"],

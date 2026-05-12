@@ -11,33 +11,26 @@ from src.config import FAISS_INDEX_PATH
 from src.db.database import init_db
 from src.services.llm import init_llm
 
+def init_rag():
+    if not os.path.exists(FAISS_INDEX_PATH):
+        print("ERROR: FAISS index not found.")
+        print("Run ingestion first: python3 scripts/ingest_pdfs.py")
+        return 
+     
+    try:
+        init_db()
+    except Exception as e:
+        print(f"Warning: Could not initialize database: {e}")
 
-def main():
-    parser = argparse.ArgumentParser(description="Vehicle recommender chat")
-    parser.add_argument(
-        "--raw-llm",
-        action="store_true",
-        help="Use baseline LLM mode without RAG context or database recommendations",
-    )
-    args = parser.parse_args()
-
+def main(raw_llm=False):
     init_llm()
-    if not args.raw_llm:
-        if not os.path.exists(FAISS_INDEX_PATH):
-            print("ERROR: FAISS index not found.")
-            print("Run ingestion first: python3 scripts/ingest_pdfs.py")
-            sys.exit(1)
 
-        try:
-            init_db()
-        except Exception as e:
-            print(f"Warning: Could not initialize database: {e}")
+    if raw_llm:
+        print("Running in raw LLM mode (no RAG context or database recommendations)")
+    else:
+        init_rag()
 
     print("Conversational Recommender System for Vehicles")
-    if args.raw_llm:
-        print("Mode: RAW LLM (no RAG, no DB)")
-    else:
-        print(f"FAISS index: {FAISS_INDEX_PATH}")
     print("Type 'exit' or 'quit' to stop.\n")
 
     while True:
@@ -51,7 +44,7 @@ def main():
                 continue
 
             print("\n[Processing...]")
-            if args.raw_llm:
+            if raw_llm:
                 result = handle_query_raw_llm(query)
             else:
                 result = handle_query(query)
@@ -59,7 +52,7 @@ def main():
             print("\nResponse:")
             print(result.get("response", "No response generated"))
 
-            if not args.raw_llm:
+            if not raw_llm:
                 print("\nTop Recommendations:")
                 for i, rec in enumerate(result.get("recommendations", [])[:3], 1):
                     brand = rec.get("brand", "Unknown")

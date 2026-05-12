@@ -14,6 +14,11 @@ PERSONA = (
     "from the provided context when relevant."
 )
 
+INSTRUCTIONS = (
+    "Answer as a helpful car salesperson in ~150-300 words. Start with a 1-line summary."
+    "If the user query is not car related, respond that you can only answer car-related questions."
+)
+
 
 def generate_prompt(query: str, parsed: dict, ranked: list, context: list):
     top_cars = ranked[:3]
@@ -28,7 +33,7 @@ def generate_prompt(query: str, parsed: dict, ranked: list, context: list):
         f"{PERSONA}\n\nUser query: {query}\n\n"
         f"Top recommendations:\n{rec_text}\n\n"
         f"Context snippets (each snippet is tagged with the vehicle it belongs to):\n{ctx_text}\n\n"
-        "Answer as a helpful car salesperson in ~150-300 words. Start with a 1-line summary."
+        f"{INSTRUCTIONS}"
     )
 
     return prompt
@@ -38,14 +43,15 @@ def generate_raw_prompt(query: str):
     return (
         f"{PERSONA}\n\n"
         f"User query: {query}\n\n"
-        "Answer as a helpful car salesperson in ~150-300 words. "
-        "Start with a 1-line summary."
+        f"{INSTRUCTIONS}"
     )
 
 
 def handle_query(query: str):
     # Step 1: Parse query
     parsed = parse_query(query)
+    print(f"Query: {query}\n")
+    print(f"Parsed query: {parsed}\n")
 
     # Step 2: Query DB for cars matching constraints
     db_cars = query_carapi_by_constraints(parsed, limit=20)

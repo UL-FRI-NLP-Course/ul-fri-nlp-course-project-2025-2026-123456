@@ -9,9 +9,6 @@ import requests
 
 def get_jwt_token():
     url = f"{CARAPI_BASEURL}/api/auth/login"
-
-    print(CARAPI_SECRET)
-    print(CARAPI_TOKEN)
     
     payload = {
         "api_token": CARAPI_TOKEN,
@@ -22,45 +19,8 @@ def get_jwt_token():
     response.raise_for_status()
     
     data = response.text.strip()
-    return data # JWT
+    return data
 
-
-def get_makes(token):
-    url = f"{CARAPI_BASEURL}/makes"
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    
-    return response.json()
-
-
-def get_models(token, make="Toyota"):
-    url = f"{CARAPI_BASEURL}/models/v2"
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    params = {"make": make}
-    
-    response = requests.get(url, headers=headers, params=params)
-    response.raise_for_status()
-    
-    return response.json()
-
-
-def get_trims(token, make="Toyota", model="Camry", year=2020):
-    url = f"{CARAPI_BASEURL}/trims/v2"
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    params = {
-        "make": make,
-        "model": model,
-        "year": year
-    }
-    
-    response = requests.get(url, headers=headers, params=params)
-    response.raise_for_status()
-    
-    return response.json()
 
 def carapi_get_paged_data(url, token, params=None):
     all_data = []
@@ -124,29 +84,10 @@ def download_carapi_data():
     except Exception as e:
         print("Error:", str(e))
 
-def main():
+def data_info():
     if not os.path.exists(PDF_ROOT):
         print(f"ERROR: PDF root directory {PDF_ROOT} not found.")
         return
-
-    # models = set()
-    # brands = set()
-    # for brand_dir in os.listdir(PDF_ROOT):
-    #     brand_path = os.path.join(PDF_ROOT, brand_dir)
-    #     if os.path.isdir(brand_path):
-    #         brands.add(brand_dir)
-    #         for filename in os.listdir(brand_path):
-    #             if filename.endswith(".pdf"):
-    #                 parts = filename.replace(".pdf", "").split("_")
-    #                 brand = parts[0]
-    #                 model_year = parts[-1]
-    #                 model_year = model_year.split("-")[0]  
-    #                 model_year = model_year.split(".")[0] 
-    #                 model_year = int(model_year)
-    #                 model = " ".join(parts[1].split()[1:])
-    #                 models.add((brand_dir, model))
-
-    #download_carapi_data()
 
     brand = "BMW"
     with open(f"data/carapi/{brand}_trims.json", "r") as f:
