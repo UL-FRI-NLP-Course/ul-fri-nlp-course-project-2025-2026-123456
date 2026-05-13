@@ -30,7 +30,8 @@ def _get_generator():
         model_name,
         quantization_config=quantization_config,
         device_map="auto",
-        dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+        #dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
     )
 
     # Qwen tokenizers often do not define a pad token; reuse EOS for generation.

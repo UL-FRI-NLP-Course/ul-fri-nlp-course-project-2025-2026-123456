@@ -42,6 +42,7 @@ def carapi_request(url, token, params=None):
     return response.json()
 
 def download_carapi_data():
+    os.makedirs("data/carapi", exist_ok=True)
     brands = os.listdir(PDF_ROOT)
 
     try:

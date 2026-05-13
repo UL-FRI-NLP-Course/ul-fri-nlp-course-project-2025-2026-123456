@@ -1,9 +1,14 @@
 import re
 
 _BUDGET_PATTERNS = [
-    re.compile(r"(?:budget|price|cost|spend(?:ing)?)\s*(?:is|of|around|about|under|below|max(?:imum)?)?\s*[$€£]?\s*(\d{1,3}(?:[.,]\d{3})*|\d+)(?:\s*(k|thousand))?", re.I),
-    re.compile(r"[$€£]\s*(\d{1,3}(?:[.,]\d{3})*|\d+)(?:\s*(k|thousand))?", re.I),
-    re.compile(r"(\d{1,3}(?:[.,]\d{3})*|\d+)\s*(k|thousand)\s*(?:euros?|dollars?|usd|eur)?", re.I),
+    #re.compile(r"(?:budget|price|cost|spend(?:ing)?)\s*(?:is|of|around|about|under|below|max(?:imum)?)?\s*[$€£]?\s*(\d{1,3}(?:[.,]\d{3})*|\d+)(?:\s*(k|thousand))?", re.I),
+    #re.compile(r"[$€£]\s*(\d{1,3}(?:[.,]\d{3})*|\d+)(?:\s*(k|thousand))?", re.I),
+    #re.compile(r"(\d{1,3}(?:[.,]\d{3})*|\d+)\s*(k|thousand)\s*(?:euros?|dollars?|usd|eur)?", re.I),
+    # ^ doesnt work if i put 1000 (?)
+    # added "up to" and "e"
+    re.compile(r"(?:budget|price|cost|spend(?:ing)?)\s*(?:is|of|around|about|under|below|max(?:imum)?|up to)?\s*[$€£]?\s*(\d+(?:[.,]\d+)?)(?:\s*(k|thousand))?", re.I),
+    re.compile(r"[$€£]\s*(\d+(?:[.,]\d+)?)(?:\s*(k|thousand))?", re.I),
+    re.compile(r"(\d+(?:[.,]\d+)?)(?:\s*(k|thousand))\s*(?:euros?|dollars?|usd|eur|e)?", re.I),
 ]
 
 _FUEL_KEYWORDS = {
@@ -38,6 +43,7 @@ _USE_CASE_KEYWORDS = {
 }
 
 
+
 def _extract_budget(query: str):
     for pattern in _BUDGET_PATTERNS:
         match = pattern.search(query)
@@ -65,6 +71,40 @@ def _find_keywords(query: str, keyword_map: dict):
     return found
 
 
+def extract_consumption(query):
+
+    p1 = r"(low|small|minimal)\s+consumption"
+    p2 = r"consumption\s*(?:is|of|around|about|under|below|max(?:imum)?|up to)?\s*(\d+(?:\.\d+)?)\s*l(?:/100km)?"
+
+    # search if user provided adjective (small...) and set manually consumption to idk, 4L/100km
+    match = re.search(p1, query)
+
+    if match:
+
+        # delete these words from query so that they don't get mixed up with other extractions
+        full_match = match.group(0)
+        cleaned_query = query.replace(full_match, "")
+
+        consumption_value = 4.0
+
+        return consumption_value, cleaned_query
+
+    # search if user provided a maximum number of consumption
+    match = re.search(p2, query)
+    if match:
+
+        consumption_value = float(match.group(1))
+
+        # delete these words from query so that they don't get mixed up with other extractions
+        full_match = match.group(0)
+        cleaned_query = query.replace(full_match, "")
+
+        return consumption_value, cleaned_query
+
+
+    return None, query
+
+
 def parse_query(query: str):
     """Parse the user query into retrieval and ranking signals.
 
@@ -74,10 +114,17 @@ def parse_query(query: str):
     normalized = query.strip()
     lower = normalized.lower()
 
+    # adding consumption and also delete part of consumption out of query
+    # because before it didn't work for smth like "big car and small consumption" -> sizes=[big, small]
+    max_consumption, removed_adj = extract_consumption(lower)
+
+    # other possible adds:
+    # car brand, car color 
+
     budget_max = _extract_budget(normalized)
     fuel_types = _find_keywords(lower, _FUEL_KEYWORDS)
     body_styles = _find_keywords(lower, _BODY_STYLES)
-    sizes = _find_keywords(lower, _SIZE_KEYWORDS)
+    sizes = _find_keywords(removed_adj, _SIZE_KEYWORDS)
     use_cases = _find_keywords(lower, _USE_CASE_KEYWORDS)
 
     seating_min = None
@@ -108,4 +155,5 @@ def parse_query(query: str):
         "seating_min": seating_min,
         "transmission": transmission,
         "terms": terms,
+        #"consumption_max": max_consumption, #(?)
     }

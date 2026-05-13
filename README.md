@@ -121,7 +121,7 @@ data/pdfs/
 
 Use the provided `get_pdf_data.py` script to download sample brochures:
 ```bash
-python scripts/get_pdf_data.py
+python scripts/get_pdf_data.py download
 ```
 
 #### 2. Run Ingestion

@@ -43,6 +43,10 @@ def main():
             pdf_name = os.path.basename(pdf_file)
             print(f"  Processing: {pdf_name}")
             chunks, meta = build_corpus(pdf_file)
+            
+            if chunks is None:
+                continue
+
             all_chunks.extend(chunks)
             all_meta.extend(meta)
             print(f"    Extracted {len(chunks)} chunks")
