@@ -7,8 +7,8 @@ load_dotenv("./.env")
 DB_URL = os.getenv("DATABASE_URL")
 
 # Embeddings and RAG
-SENTENCE_TRANSFORMER_MODEL = os.getenv(
-    "SENTENCE_TRANSFORMER_MODEL", "all-MiniLM-L6-v2"
+EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL", "all-MiniLM-L6-v2"
 )
 HF_LLM_MODEL = os.getenv("HF_LLM_MODEL", "Qwen/Qwen2-7B-Instruct")
 

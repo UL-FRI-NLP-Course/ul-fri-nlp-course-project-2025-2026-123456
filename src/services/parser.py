@@ -1,4 +1,17 @@
 import re
+import json
+import os
+import sys
+from typing import Any, Dict
+
+src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+repo_root = os.path.abspath(os.path.join(src_dir, ".."))
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+
+from src.services.llm import generate_response
 
 _BUDGET_PATTERNS = [
     #re.compile(r"(?:budget|price|cost|spend(?:ing)?)\s*(?:is|of|around|about|under|below|max(?:imum)?)?\s*[$€£]?\s*(\d{1,3}(?:[.,]\d{3})*|\d+)(?:\s*(k|thousand))?", re.I),
@@ -106,20 +119,54 @@ def extract_consumption(query):
 
 
 def parse_query(query: str):
-    """Parse the user query into retrieval and ranking signals.
-
-    Returns a compact dict with structured preferences and a list of search terms
-    that can be used to enrich retrieval.
-    """
     normalized = query.strip()
+
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    schema_path = os.path.join(repo_root, "data", "carapi_schema.json")
+    schema = {}
+    if os.path.exists(schema_path):
+        with open(schema_path, "r", encoding="utf-8") as fh:
+            schema = json.load(fh)
+
+    prompt = (
+        "You are a JSON extractor. Given a user's natural-language car query and a "
+        "schema (JSON) describing available fields, extract the intent and produce a "
+        "JSON object mapping field names to values. Only include keys that appear in "
+        "the schema. Use types: number for numeric fields, string for free text, list "
+        "for categorical multiple values. If a field is not mentioned, omit it or set "
+        "it to null. Return ONLY valid JSON (no surrounding explanation).\n\n"
+        f"Schema: {json.dumps(schema, ensure_ascii=False)}\n\n"
+        f"User query: {normalized}\n\n"
+        "Output:"
+    )
+
+    print(json.dumps(schema, ensure_ascii=False))
+
+    llm_out = generate_response(prompt)
+
+    print(f"LLM output: {llm_out}")
+
+    # extract the first JSON object in the LLM output
+    start = llm_out.find("{")
+    end = llm_out.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        json_text = llm_out[start:end+1]
+        parsed = json.loads(json_text)
+
+        # Normalize some common fields expected by the system
+        # Ensure `query` and `terms` exist
+        parsed.setdefault("query", normalized)
+        if "terms" not in parsed:
+            parsed["terms"] = [normalized]
+
+        return parsed
+
+def heuristic_parse_query(normalized: str) -> Dict[str, Any]:
     lower = normalized.lower()
 
     # adding consumption and also delete part of consumption out of query
     # because before it didn't work for smth like "big car and small consumption" -> sizes=[big, small]
     max_consumption, removed_adj = extract_consumption(lower)
-
-    # other possible adds:
-    # car brand, car color 
 
     budget_max = _extract_budget(normalized)
     fuel_types = _find_keywords(lower, _FUEL_KEYWORDS)
@@ -155,5 +202,9 @@ def parse_query(query: str):
         "seating_min": seating_min,
         "transmission": transmission,
         "terms": terms,
-        #"consumption_max": max_consumption, #(?)
     }
+
+if __name__ == "__main__":
+    user_query = "I'm looking for a spacious SUV under $30k with low consumption, preferably electric or hybrid, for family road trips. It should have at least 5 seats and an automatic transmission."
+    parsed = parse_query(user_query)
+    print(json.dumps(parsed, indent=2, ensure_ascii=False))

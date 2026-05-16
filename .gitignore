@@ -144,3 +144,4 @@ data/carapi/
 data/vector_store/
 data/cars.db
 data/carapi.db
+data/carapi_schema.json

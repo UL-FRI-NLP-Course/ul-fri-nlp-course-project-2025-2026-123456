@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from src.config import DATA_DIR
 from src.db.carapi_schema import CarApiCar
 from src.db.database import engine, init_db
+from src.db.carapi_schema_json import create_carapi_schema_json
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
@@ -285,6 +286,11 @@ def main():
         print(f"\nTotal: {total_cars} cars loaded into carapi_cars")
     finally:
         session.close()
+
+    summary = create_carapi_schema_json()
+    with open("data/carapi_fields_summary.json", "w", encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2, ensure_ascii=False)
+    
 
 
 if __name__ == "__main__":

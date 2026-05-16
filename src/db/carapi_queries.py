@@ -1,4 +1,6 @@
-from sqlalchemy import text
+import random
+
+from sqlalchemy import inspect, text
 
 from src.db.database import engine
 
@@ -97,3 +99,27 @@ def get_all_carapi_cars(limit=100):
 
 def cars_to_dicts(cars):
     return list(cars)
+
+
+def get_unique_values_from_column(column_name: str, limit: int = None):
+    inspector = inspect(engine)
+    valid_columns = {column["name"] for column in inspector.get_columns("carapi_cars")}
+
+    if column_name not in valid_columns:
+        raise ValueError(f"Unknown column: {column_name}")
+
+    sql = text(
+        f'SELECT DISTINCT "{column_name}" AS value FROM carapi_cars WHERE "{column_name}" IS NOT NULL'
+    )
+
+    with engine.connect() as connection:
+        result = connection.execute(sql)
+        unique_values = [row[0] for row in result if row[0] is not None]
+
+    if limit is None:
+        return unique_values
+
+    if limit >= len(unique_values):
+        return unique_values
+
+    return random.sample(unique_values, limit)
