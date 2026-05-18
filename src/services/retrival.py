@@ -48,6 +48,10 @@ def retrieve_candidates(parsed_query, k=10):
 
 	query = parsed_query.get("query", "")
 
+	# in case of multiple queries:
+	if isinstance(query, list):
+		query = " ".join(query)
+
 	query_emb = embed([query])[0]
 	query_emb = query_emb.astype("float32")
 
@@ -69,7 +73,7 @@ def retrieve_candidates(parsed_query, k=10):
 		chunk_text = meta.get("text", f"Chunk {meta['chunk_id']} from {meta['source']}")
 		context.append(f"[{vehicle_label}] {chunk_text}")
 
-	print(f"Candidates retrieved: {candidates}\n")
-	print(f"Context: {context}\n")
+	#print(f"Candidates retrieved: {candidates}\n")
+	#print(f"Context: {context}\n")
 
 	return candidates, context
