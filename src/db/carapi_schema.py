@@ -162,8 +162,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
         display_name="Model",
         description="Vehicle model name.",
         user_intents=[
-            "find Honda Civic",
-            "Tesla Model 3"
+            "looking for a specific model",
         ],
         synonyms=[
             "model",
@@ -171,17 +170,13 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
         ],
         related_terms=[
            "series",
-            "size",
-            "luxury level",
-            "performance level",
-            "price point", 
-            "quality", 
+           "trim",
         ],
         value_type="string",
         example_queries=[
-            "bmw x5",
-            "tesla model 3",
-            "honda civic"
+            "I want a BMW x5",
+            "I am very happy with my old Honda Civic and would like to find something similar",
+            "Considering a Ford F-150 or a Chevrolet Silverado"
         ],
         sample_size = None
     ),
@@ -200,16 +195,14 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "vehicle line"
         ],
         related_terms=[
-            "size",
-            "luxury level",
-            "performance level",
-            "price point", 
-            "quality", 
+            "model", 
+            "trim"
         ],
         value_type="string",
         example_queries=[
             "bmw 5 series",
-            "audi a series"
+            "audi a series", 
+            "mercedes c class"
         ],
         sample_size = 5
     ),
@@ -250,7 +243,9 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
         user_intents=[
             "find cars under $30,000",
             "compare prices",
-            "budget friendly"
+            "budget friendly",
+            "find cheap cars",
+            "good value for money"
         ],
         synonyms=[
             "price",
@@ -262,6 +257,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "expensive",
             "value", 
             "budget",
+            "cheap",
         ],
         value_type="float",
         example_queries=[
@@ -870,6 +866,41 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
         sample_size = None
     ),
 
+    'engine_type': ColumnMetadata(
+        name="engine_type",
+        display_name="Engine Type",
+        description="The type of engine or powertrain configuration.",
+        user_intents=[
+            "what type of engine does it have",
+            "fuel type", 
+        ],
+        synonyms=[
+            "powertrain",
+            "motor type",
+            "driving power"
+        ],
+        related_terms=[
+            "efficency", 
+            "operational cost",
+            "environmentally friendly",
+            "good for city driving",
+            "performance",
+            "fuel consumption",
+            "electric",
+            "hybrid",
+            "petrol",
+        ],
+        value_type="string",
+        example_queries=[
+            "looking for an electric car",
+            "diesel car with good fuel economy",
+            "hybrid for city driving on the weekdays and long trips on the weekends",
+            "fun gas powered car with good acceleration",
+            "I do a lot of highway driving so I would like to have a diesel engine"
+        ],
+        sample_size = None
+    ),
+
     "fuel_tank_capacity": ColumnMetadata(
         name="fuel_tank_capacity",
         display_name="Fuel Tank Capacity",
@@ -930,91 +961,91 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
         ]
     ),
 
-    "epa_city_l_per_100km": ColumnMetadata(
-        name="epa_city_l_per_100km",
-        display_name="Fuel Consumption City",
-        description="City fuel consumption in liters per 100 kilometers.",
-        user_intents=[
-            "good for city driving",
-            "efficient in stop and go traffic"
-        ],
-        synonyms=[
-            "city fuel economy",
-            "city fuel consumption"
-        ],
-        related_terms=[
-            "city driving",
-            "stop and go traffic",
-            "fuel efficient"
-        ],
-        units="L/100km",
-        value_type="float",
-        example_queries=[
-            "suv with good city fuel economy",
-            "car that is efficient in stop and go traffic",
-            "hybrid with low city consumption",
-            "efficient car for urban commuting",
-            "car with low fuel consumption in the city", 
-            "less than 8 liters per 100km in the city"
-        ]
-    ),
+    # "epa_city_l_per_100km": ColumnMetadata(
+    #     name="epa_city_l_per_100km",
+    #     display_name="Fuel Consumption City",
+    #     description="City fuel consumption in liters per 100 kilometers.",
+    #     user_intents=[
+    #         "good for city driving",
+    #         "efficient in stop and go traffic"
+    #     ],
+    #     synonyms=[
+    #         "city fuel economy",
+    #         "city fuel consumption"
+    #     ],
+    #     related_terms=[
+    #         "city driving",
+    #         "stop and go traffic",
+    #         "fuel efficient"
+    #     ],
+    #     units="L/100km",
+    #     value_type="float",
+    #     example_queries=[
+    #         "suv with good city fuel economy",
+    #         "car that is efficient in stop and go traffic",
+    #         "hybrid with low city consumption",
+    #         "efficient car for urban commuting",
+    #         "car with low fuel consumption in the city", 
+    #         "less than 8 liters per 100km in the city"
+    #     ]
+    # ),
 
-    "epa_highway_l_per_100km": ColumnMetadata(
-        name="epa_highway_l_per_100km",
-        display_name="Fuel Consumption Highway",
-        description="Highway fuel consumption in liters per 100 kilometers.",
-        user_intents=[
-            "good for highway driving",
-            "efficient on the highway"
-        ],
-        synonyms=[
-            "highway fuel economy",
-            "highway fuel consumption"
-        ],
-        related_terms=[
-            "highway driving",
-            "long distance travel",
-            "fuel efficient"
-        ],
-        units="L/100km",
-        value_type="float",
-        example_queries=[
-            "suv with good highway fuel economy",
-            "car that is efficient on the highway",
-            "hybrid with low highway consumption",
-            "efficient car for long distance travel",
-            "car with low fuel consumption on the highway",
-            "less than 6 liters per 100km on the highway"
-        ]
-    ),
+    # "epa_highway_l_per_100km": ColumnMetadata(
+    #     name="epa_highway_l_per_100km",
+    #     display_name="Fuel Consumption Highway",
+    #     description="Highway fuel consumption in liters per 100 kilometers.",
+    #     user_intents=[
+    #         "good for highway driving",
+    #         "efficient on the highway"
+    #     ],
+    #     synonyms=[
+    #         "highway fuel economy",
+    #         "highway fuel consumption"
+    #     ],
+    #     related_terms=[
+    #         "highway driving",
+    #         "long distance travel",
+    #         "fuel efficient"
+    #     ],
+    #     units="L/100km",
+    #     value_type="float",
+    #     example_queries=[
+    #         "suv with good highway fuel economy",
+    #         "car that is efficient on the highway",
+    #         "hybrid with low highway consumption",
+    #         "efficient car for long distance travel",
+    #         "car with low fuel consumption on the highway",
+    #         "less than 6 liters per 100km on the highway"
+    #     ]
+    # ),
 
-    "range_city_km": ColumnMetadata(
-        name="range_city_km",
-        display_name="City Range",
-        description="Estimated driving range in city conditions in kilometers.",
-        user_intents=[
-            "long city range",
-            "good for urban driving"
-        ],
-        synonyms=[
-            "city range",
-            "range in the city"
-        ],
-        related_terms=[
-            "city driving",
-            "urban range",
-            "fuel efficient"
-        ],
-        units="km",
-        value_type="integer",
-        example_queries=[
-            "suv with long city range",
-            "car that is good for urban driving",
-            "wont spend a lot of time at the gas station",
-            "efficient car for stop and go traffic",
-            "city car that I can fill up once a month"
-        ]
-    ),
+    # "range_city_km": ColumnMetadata(
+    #     name="range_city_km",
+    #     display_name="City Range",
+    #     description="Estimated driving range in city conditions in kilometers.",
+    #     user_intents=[
+    #         "long city range",
+    #         "good for urban driving"
+    #     ],
+    #     synonyms=[
+    #         "city range",
+    #         "range in the city"
+    #     ],
+    #     related_terms=[
+    #         "city driving",
+    #         "urban range",
+    #         "fuel efficient"
+    #     ],
+    #     units="km",
+    #     value_type="integer",
+    #     example_queries=[
+    #         "suv with long city range",
+    #         "car that is good for urban driving",
+    #         "wont spend a lot of time at the gas station",
+    #         "efficient car for stop and go traffic",
+    #         "city car that I can fill up once a month"
+    #     ]
+    # ),
 
     "range_highway_km": ColumnMetadata(
         name="range_highway_km",

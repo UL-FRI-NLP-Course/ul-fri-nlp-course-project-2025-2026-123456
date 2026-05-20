@@ -79,25 +79,38 @@ def main():
         make = "Toyota"
 
         cars = session.query(CarApiCar).filter(
-        CarApiCar.fuel_type.ilike("electric")
-        ).limit(3).all()
+        CarApiCar.make.ilike("BMW")
+        ).limit(10).all()
         
         if not cars:
             print(f"No cars found for make: {make}")
             return
         
         for car in cars:
-            print(f"\n  {car.year} {car.make} {car.model} {car.trim}")
-            print(f"    Cargo capacity: {car.cargo_capacity} L")
-            print(f"    Cargo capacity (max): {car.max_cargo_capacity} L")
-            print(f"    Curb weight: {car.curb_weight_kg} kg")
-            print(f"    Gross weight: {car.gross_weight_kg} kg")
+            print(f"\n  {car.year} {car.make}")
+            print(f"    Model: {car.model}")
+            print(f"    Series: {car.series}")
+            print(f"    Submodel: {car.submodel}")
+            print(f"    Trim: {car.trim}")
+            print(f"    Body Type: {car.body_type}")
+            print(f"    Fuel Type: {car.fuel_type}")
+            print(f"    Engine type: {car.engine_type}")
+            print(f"    MSRP: ${car.msrp:,.2f}")
 
-            print(f"   Charge time (240V): {car.epa_time_to_charge_hr_240v_electric} hours")
-            print(f"    What is this: {car.epa_highway_kmpl_electric} kWh")
-            
     finally:
         session.close()
+
+    unique_engine_types = session.query(distinct(CarApiCar.engine_type)).all()
+    print("\nUnique engine types:")
+    for engine_type in unique_engine_types:
+        print(f"  {engine_type[0]}")
+
+    unique_fuel_types = session.query(distinct(CarApiCar.fuel_type)).all()
+    print("\nUnique fuel types:")
+    for fuel_type in unique_fuel_types:
+        print(f"  {fuel_type[0]}")
+
+
 
 
 if __name__ == "__main__":

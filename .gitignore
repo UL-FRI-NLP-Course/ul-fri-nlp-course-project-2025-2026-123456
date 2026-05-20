@@ -145,3 +145,8 @@ data/vector_store/
 data/cars.db
 data/carapi.db
 data/carapi_schema.json
+data/carapi_column_embeddings.npy
+
+# Benchmark intermediate files
+benchmark/leave_one_out/
+benchmark/embeddings/

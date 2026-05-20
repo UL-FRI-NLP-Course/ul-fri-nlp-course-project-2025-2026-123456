@@ -14,3 +14,6 @@ torchvision
 torchaudio
 accelerate
 bitsandbytes
+hf_xet
+einops
+peft

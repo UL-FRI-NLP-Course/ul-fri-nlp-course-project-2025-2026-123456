@@ -2,13 +2,14 @@ import argparse
 import json
 import os
 import sys
+import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.config import DATA_DIR
+from src.config import DATA_DIR, EMBEDDING_MODEL
 from src.db.carapi_schema import CarApiCar
 from src.db.database import engine, init_db
-from src.db.carapi_schema_json import create_carapi_schema_json
+from src.db.carapi_column_embeddings import build_and_save_column_embeddings
 from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
@@ -287,11 +288,10 @@ def main():
     finally:
         session.close()
 
-    summary = create_carapi_schema_json()
-    with open("data/carapi_fields_summary.json", "w", encoding="utf-8") as fh:
-        json.dump(summary, fh, indent=2, ensure_ascii=False)
+
+    # Generate column embeddings for Carapi data
+    embeddings_path = os.path.join(DATA_DIR, f"carapi_column_embeddings.npy")
+    build_and_save_column_embeddings(model_name=EMBEDDING_MODEL, embeddings_path=embeddings_path, clear=args.clear)
     
-
-
 if __name__ == "__main__":
     main()

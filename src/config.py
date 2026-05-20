@@ -8,7 +8,7 @@ DB_URL = os.getenv("DATABASE_URL")
 
 # Embeddings and RAG
 EMBEDDING_MODEL = os.getenv(
-    "EMBEDDING_MODEL", "all-MiniLM-L6-v2"
+    "EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-4B"
 )
 HF_LLM_MODEL = os.getenv("HF_LLM_MODEL", "Qwen/Qwen2-7B-Instruct")
 

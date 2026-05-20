@@ -4,8 +4,6 @@ from sqlalchemy import inspect, text
 
 from src.db.database import engine
 
-
-
 def _row_to_car_dict(row):
     return {
         "id": row["id"],

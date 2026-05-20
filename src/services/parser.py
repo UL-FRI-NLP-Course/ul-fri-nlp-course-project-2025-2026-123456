@@ -119,14 +119,12 @@ def extract_consumption(query):
 
 
 def parse_query(query: str):
-    normalized = query.strip()
+    # TO DO - implement parsing with the column embeddings and retrieval
+    # 1. First find related columns
+    # 2. Extract relevant values for these columns with LLM
+    # 3. Ask questions about related columns that cannot be extracted (e.g. "what is your budget?" if budget is relevant but not mentioned in query)
 
-    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-    schema_path = os.path.join(repo_root, "data", "carapi_schema.json")
-    schema = {}
-    if os.path.exists(schema_path):
-        with open(schema_path, "r", encoding="utf-8") as fh:
-            schema = json.load(fh)
+    return heuristic_parse_query(query)
 
     prompt = (
         "You are a JSON extractor. Given a user's natural-language car query and a "
@@ -140,26 +138,7 @@ def parse_query(query: str):
         "Output:"
     )
 
-    print(json.dumps(schema, ensure_ascii=False))
-
     llm_out = generate_response(prompt)
-
-    print(f"LLM output: {llm_out}")
-
-    # extract the first JSON object in the LLM output
-    start = llm_out.find("{")
-    end = llm_out.rfind("}")
-    if start != -1 and end != -1 and end > start:
-        json_text = llm_out[start:end+1]
-        parsed = json.loads(json_text)
-
-        # Normalize some common fields expected by the system
-        # Ensure `query` and `terms` exist
-        parsed.setdefault("query", normalized)
-        if "terms" not in parsed:
-            parsed["terms"] = [normalized]
-
-        return parsed
 
 def heuristic_parse_query(normalized: str) -> Dict[str, Any]:
     lower = normalized.lower()
