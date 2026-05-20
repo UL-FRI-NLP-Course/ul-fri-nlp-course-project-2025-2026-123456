@@ -239,7 +239,7 @@ def make_conversation(query: str, state: ConversationState):
 
     queries_joined = [f"{q} " for q in state.queries]
     parsed["query"] = queries_joined
-    #print(f"final parsed:\n{parsed}")
+    print(f"final parsed:\n{parsed}")
 
 
     state.query_parsed = parsed

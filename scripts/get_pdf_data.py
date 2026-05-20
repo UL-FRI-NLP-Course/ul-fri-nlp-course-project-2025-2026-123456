@@ -69,8 +69,8 @@ def get_data(brands, min_year=None, only_latest=False):
 
                 dicti[model].append((model_year, href))
 
-        if download_all:
-            return
+        #if download_all:
+        #    return
         
         # filter by year
         for model, versions in dicti.items():
