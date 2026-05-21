@@ -50,6 +50,12 @@ def get_makes_and_count(session):
         print(f"  {make:<20} {count:>5} cars")
 
 
+def print_unique_column_values(label, values):
+    print(f"\nUnique {label}:")
+    for value in sorted(values):
+        print(f"  {value}")
+
+
 def main():
     """Run all test queries."""
     print("\n" + "="*60)
@@ -79,36 +85,27 @@ def main():
         make = "Toyota"
 
         cars = session.query(CarApiCar).filter(
-        CarApiCar.make.ilike("BMW")
-        ).limit(10).all()
+            CarApiCar.make.ilike(make)
+        ).all()
         
         if not cars:
             print(f"No cars found for make: {make}")
             return
-        
-        for car in cars:
-            print(f"\n  {car.year} {car.make}")
-            print(f"    Model: {car.model}")
-            print(f"    Series: {car.series}")
-            print(f"    Submodel: {car.submodel}")
-            print(f"    Trim: {car.trim}")
-            print(f"    Body Type: {car.body_type}")
-            print(f"    Fuel Type: {car.fuel_type}")
-            print(f"    Engine type: {car.engine_type}")
-            print(f"    MSRP: ${car.msrp:,.2f}")
+
+        print(f"Found {len(cars)} cars for make: {make}")
+
+        unique_models = {car.model for car in cars if car.model}
+        unique_series = {car.series for car in cars if car.series}
+        unique_trims = {car.trim for car in cars if car.trim}
+        unique_submodels = {car.submodel for car in cars if car.submodel}
+
+        print_unique_column_values("models", unique_models)
+        print_unique_column_values("series", unique_series)
+        print_unique_column_values("trims", unique_trims)
+        print_unique_column_values("submodels", unique_submodels)
 
     finally:
         session.close()
-
-    unique_engine_types = session.query(distinct(CarApiCar.engine_type)).all()
-    print("\nUnique engine types:")
-    for engine_type in unique_engine_types:
-        print(f"  {engine_type[0]}")
-
-    unique_fuel_types = session.query(distinct(CarApiCar.fuel_type)).all()
-    print("\nUnique fuel types:")
-    for fuel_type in unique_fuel_types:
-        print(f"  {fuel_type[0]}")
 
 
 

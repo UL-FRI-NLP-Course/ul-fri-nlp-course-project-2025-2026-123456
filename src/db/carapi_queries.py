@@ -2,7 +2,67 @@ import random
 
 from sqlalchemy import inspect, text
 
+import sys
+import os
+
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
+
 from src.db.database import engine
+
+
+def _normalize_constraint_name(name: str) -> str:
+    return (name or "").strip().lower()
+
+
+def _build_constraint_clause(constraint: dict, params: dict, index: int):
+    name = constraint.get("name")
+    value = constraint.get("value")
+    op = _normalize_constraint_name(constraint.get("constraint"))
+
+    if not name or op in {"", "none", "null"}:
+        return None
+
+    column = _normalize_constraint_name(name)
+
+    if value is None:
+        return None
+
+    param_name = f"{column}_{index}"
+
+    if op == "equal":
+        # support list-valued equals -> IN clause
+        if isinstance(value, (list, tuple)):
+            placeholders = []
+            for i, v in enumerate(value):
+                key = f"{param_name}_{i}"
+                placeholders.append(f":{key}")
+                params[key] = v.lower() if isinstance(v, str) else v
+            if all(isinstance(v, str) for v in value):
+                return f"LOWER(COALESCE({column}, '')) IN ({', '.join(placeholders)})"
+            else:
+                return f"{column} IN ({', '.join(placeholders)})"
+
+        params[param_name] = value.lower() if isinstance(value, str) else value
+        return f"LOWER(COALESCE({column}, '')) = :{param_name}" if isinstance(value, str) else f"{column} = :{param_name}"
+
+    if op == "min":
+        params[param_name] = value
+        return f"COALESCE({column}, 0) >= :{param_name}"
+
+    if op == "max":
+        params[param_name] = value
+        return f"COALESCE({column}, 0) <= :{param_name}"
+
+    if op == "range" and isinstance(value, (list, tuple)) and len(value) == 2:
+        low_name = f"{column}_{index}_low"
+        high_name = f"{column}_{index}_high"
+        params[low_name] = value[0]
+        params[high_name] = value[1]
+        return f"COALESCE({column}, 0) BETWEEN :{low_name} AND :{high_name}"
+
+    return None
 
 def _row_to_car_dict(row):
     return {
@@ -45,42 +105,55 @@ def _fetch_car_rows(where_clause="", params=None, limit=20):
         return [_row_to_car_dict(row) for row in result.mappings()]
 
 
-def query_carapi_by_constraints(parsed_query: dict, limit=20):
+def value_exists_in_column(column_name: str, value) -> bool:
+    inspector = inspect(engine)
+    valid_columns = {column["name"] for column in inspector.get_columns("carapi_cars")}
+
+    if column_name not in valid_columns:
+        raise False
+
+    if value is None:
+        return False
+
+    if isinstance(value, str):
+        sql = text(
+            f'SELECT 1 FROM carapi_cars WHERE LOWER(COALESCE("{column_name}", "")) = :value LIMIT 1'
+        )
+        params = {"value": value.strip().lower()}
+    else:
+        sql = text(f'SELECT 1 FROM carapi_cars WHERE "{column_name}" = :value LIMIT 1')
+        params = {"value": value}
+
+    with engine.connect() as connection:
+        result = connection.execute(sql, params).first()
+        return result is not None
+
+
+def query_carapi_by_constraints(constraints: list[dict], limit=20):
+    filtered = []
+    for c in constraints:
+        name = c.get("name")
+        value = c.get("value")
+
+        if not name or value is None:
+            continue
+
+        column = _normalize_constraint_name(name)
+
+        if isinstance(value, (list, tuple)):
+            valid_values = [v for v in value if value_exists_in_column(column, v)]
+            if valid_values:
+                filtered.append({"name": column, "value": valid_values, "constraint": c.get("constraint")})
+        else:
+            if value_exists_in_column(column, value):
+                filtered.append({"name": column, "value": value, "constraint": c.get("constraint")})
+
     clauses = []
     params = {}
-
-    budget_max = parsed_query.get("budget_max")
-    if budget_max is not None:
-        clauses.append("COALESCE(msrp, 0) <= :budget_max")
-        params["budget_max"] = budget_max
-
-    fuel_types = parsed_query.get("fuel_types", [])
-    if fuel_types:
-        placeholders = []
-        for index, fuel_type in enumerate(fuel_types):
-            key = f"fuel_{index}"
-            placeholders.append(f":{key}")
-            params[key] = fuel_type.lower()
-        clauses.append(f"LOWER(COALESCE(fuel_type, '')) IN ({', '.join(placeholders)})")
-
-    body_styles = parsed_query.get("body_styles", [])
-    if body_styles:
-        placeholders = []
-        for index, body_style in enumerate(body_styles):
-            key = f"body_{index}"
-            placeholders.append(f":{key}")
-            params[key] = body_style.lower()
-        clauses.append(f"LOWER(COALESCE(body_type, '')) IN ({', '.join(placeholders)})")
-
-    seating_min = parsed_query.get("seating_min")
-    if seating_min is not None:
-        clauses.append("COALESCE(seats, 0) >= :seating_min")
-        params["seating_min"] = seating_min
-
-    transmission = parsed_query.get("transmission")
-    if transmission:
-        clauses.append("LOWER(COALESCE(transmission, '')) = :transmission")
-        params["transmission"] = transmission.lower()
+    for index, constraint in enumerate(filtered):
+        clause = _build_constraint_clause(constraint, params, index)
+        if clause:
+            clauses.append(clause)
 
     where_clause = " AND ".join(clauses)
     return _fetch_car_rows(where_clause=where_clause, params=params, limit=limit)
@@ -121,3 +194,16 @@ def get_unique_values_from_column(column_name: str, limit: int = None):
         return unique_values
 
     return random.sample(unique_values, limit)
+
+
+if __name__ == "__main__":
+    constraints = [
+        {'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'},
+        {'name': 'model', 'value': None, 'constraint': None},
+        {'name': 'msrp', 'value': [50000, 60000], 'constraint': 'range'}, 
+        {'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}
+    ]
+
+    cars = query_carapi_by_constraints(constraints)
+    for car in cars:
+        print(car)
