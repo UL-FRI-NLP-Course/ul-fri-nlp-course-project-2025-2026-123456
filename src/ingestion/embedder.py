@@ -27,6 +27,20 @@ def get_model(model_name: str = None):
     if model_name is None:
         model_name = EMBEDDING_MODEL
 
+    global _embed_model, _model_name
+
+    if model_name is None:
+        model_name = EMBEDDING_MODEL
+
+    if _embed_model is None or _model_name != model_name:
+        _embed_model = SentenceTransformer(model_name, trust_remote_code=True)
+        _model_name = model_name
+
+    if _model_name is not None and model_name != _model_name:
+        raise ValueError(
+            f"Embedding model mismatch: loaded={_model_name}, requested={model_name}"
+        )
+
     if _embed_model is None or _model_name != model_name:
         _embed_model = SentenceTransformer(model_name, trust_remote_code=True)
         _model_name = model_name
@@ -48,9 +62,33 @@ def init_embedder(model_name: str = None):
     get_model(model_name)
     print(f"Embedding model '{_model_name}' loaded successfully.\n")
 
+# def embed_query(query: str, model_name: str = None):
+#     if model_name is None:
+#         model_name = EMBEDDING_MODEL
+#
+#     if model_name.startswith('Qwen'):
+#         formatted_query = format_query_qwen(query)
+#     elif model_name.startswith('BAAI/bge'):
+#         formatted_query = format_query_baai(query)
+#     elif model_name.startswith('nomic'):
+#         formatted_query = format_query_nomic(query)
+#     elif model_name.startswith('google'):
+#         formatted_query = format_query_gemma(query)
+#     elif model_name.startswith('jinaai'):
+#         return embed([query], model_name=model_name, task="retrieval", prompt_name="query")[0]
+#     else:
+#         formatted_query = query
+#
+#     return embed([formatted_query], model_name=model_name)[0]
+
 def embed_query(query: str, model_name: str = None):
-    if model_name is None:
-        model_name = EMBEDDING_MODEL
+    model_name = model_name or EMBEDDING_MODEL
+
+    # safety: prevent silent mismatches
+    if model_name != EMBEDDING_MODEL:
+        raise ValueError(
+            f"Embedding model mismatch: {model_name} vs {EMBEDDING_MODEL}"
+        )
 
     if model_name.startswith('Qwen'):
         formatted_query = format_query_qwen(query)
@@ -66,6 +104,7 @@ def embed_query(query: str, model_name: str = None):
         formatted_query = query
 
     return embed([formatted_query], model_name=model_name)[0]
+
 
 def embed_column(text: str, model_name: str = None):
     if model_name is None:

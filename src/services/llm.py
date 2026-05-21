@@ -4,62 +4,105 @@ from typing import Any, Dict
 
 import logging
 
-import torch
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-    BitsAndBytesConfig,
-    GenerationConfig,
-    TextStreamer,
-)
+# import torch
+# from transformers import (
+#     AutoModelForCausalLM,
+#     AutoTokenizer,
+#     BitsAndBytesConfig,
+#     GenerationConfig,
+#     TextStreamer,
+# )
+import requests
 
 from src.config import HF_LLM_MODEL, HF_LLM_PARSING_MODEL, USE_4BIT_QUANTIZATION
 
-_model_name: str = HF_LLM_MODEL
-_model: AutoModelForCausalLM | None = None
-_tokenizer: AutoTokenizer | None = None
+# _model_name: str = HF_LLM_MODEL
+# _model: AutoModelForCausalLM | None = None
+# _tokenizer: AutoTokenizer | None = None
 
-def get_model(model_name: str = HF_LLM_MODEL) -> tuple[AutoModelForCausalLM, AutoTokenizer]:
-    global _model, _tokenizer, _model_name
+# def get_model(model_name: str = HF_LLM_MODEL) -> tuple[AutoModelForCausalLM, AutoTokenizer]:
+#     global _model, _tokenizer, _model_name
+#
+#     if _model is not None and model_name == _model_name:
+#         return _model, _tokenizer
+#
+#     _tokenizer = AutoTokenizer.from_pretrained(
+#         model_name,
+#         trust_remote_code=True,
+#     )
+#
+#     if USE_4BIT_QUANTIZATION:
+#         quant_cfg = BitsAndBytesConfig(
+#             load_in_4bit=True,
+#             bnb_4bit_quant_type="nf4",
+#             bnb_4bit_use_double_quant=True,
+#             bnb_4bit_compute_dtype=torch.bfloat16,
+#         )
+#     else:
+#         quant_cfg = None
+#
+#     _model = AutoModelForCausalLM.from_pretrained(
+#         model_name,
+#         quantization_config=quant_cfg,
+#         device_map="auto",
+#         torch_dtype=torch.bfloat16,
+#         trust_remote_code=True,
+#         attn_implementation="sdpa",
+#     )
+#     _model.eval()
+#
+#     return _model, _tokenizer
 
-    if _model is not None and model_name == _model_name:
-        return _model, _tokenizer
+# def init_llm():
+#     if HF_LLM_PARSING_MODEL == HF_LLM_MODEL:
+#         get_model(HF_LLM_MODEL)  # Single model for both generation and parsing
+#         logging.info("LLM model '%s' loaded successfully for both generation and parsing.\n", HF_LLM_MODEL)
+#     else:
+#         logging.warning("Parsing model '%s' is different from generation model '%s'. Cannot preload models.", HF_LLM_PARSING_MODEL, HF_LLM_MODEL)
+#         logging.warning("Update config to use the same model for both to enable preloading and faster inference.")
 
-    _tokenizer = AutoTokenizer.from_pretrained(
-        model_name,
-        trust_remote_code=True,
-    )
 
-    if USE_4BIT_QUANTIZATION:
-        quant_cfg = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_compute_dtype=torch.bfloat16,
-        )
-    else:
-        quant_cfg = None
-
-    _model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        quantization_config=quant_cfg,
-        device_map="auto",
-        torch_dtype=torch.bfloat16,
-        trust_remote_code=True,
-        attn_implementation="sdpa",
-    )
-    _model.eval()
-
-    return _model, _tokenizer
-
-def init_llm():
-    if HF_LLM_PARSING_MODEL == HF_LLM_MODEL:
-        get_model(HF_LLM_MODEL)  # Single model for both generation and parsing
-        logging.info("LLM model '%s' loaded successfully for both generation and parsing.\n", HF_LLM_MODEL)
-    else: 
-        logging.warning("Parsing model '%s' is different from generation model '%s'. Cannot preload models.", HF_LLM_PARSING_MODEL, HF_LLM_MODEL)
-        logging.warning("Update config to use the same model for both to enable preloading and faster inference.")
-
+# def run_inference(
+#     messages: list[dict],
+#     *,
+#     max_new_tokens: int,
+#     temperature: float,
+#     top_p: float,
+#     repetition_penalty: float,
+#     do_sample: bool,
+#     stream: bool = False,
+#     model_name: str = HF_LLM_MODEL,
+# ) -> str:
+#     model, tokenizer = get_model(model_name)
+#
+#     # Apply Qwen chat template — produces the <|im_start|>…<|im_end|> wrapping
+#     text = tokenizer.apply_chat_template(
+#         messages,
+#         tokenize=False,
+#         add_generation_prompt=True,
+#     )
+#     inputs = tokenizer(text, return_tensors="pt").to(model.device)
+#
+#     gen_cfg = GenerationConfig(
+#         max_new_tokens=max_new_tokens,
+#         do_sample=do_sample,
+#         temperature=temperature if do_sample else None,
+#         top_p=top_p if do_sample else None,
+#         repetition_penalty=repetition_penalty,
+#         pad_token_id=tokenizer.eos_token_id,
+#     )
+#
+#     streamer = TextStreamer(tokenizer, skip_prompt=True) if stream else None
+#
+#     with torch.inference_mode():
+#         output_ids = model.generate(
+#             **inputs,
+#             generation_config=gen_cfg,
+#             streamer=streamer,
+#         )
+#
+#     new_tokens = output_ids[0][inputs["input_ids"].shape[-1]:]
+#     return tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
 
 def run_inference(
     messages: list[dict],
@@ -70,39 +113,31 @@ def run_inference(
     repetition_penalty: float,
     do_sample: bool,
     stream: bool = False,
-    model_name: str = HF_LLM_MODEL,
+    model_name: str = None,
 ) -> str:
-    model, tokenizer = get_model(model_name)
 
-    # Apply Qwen chat template — produces the <|im_start|>…<|im_end|> wrapping
-    text = tokenizer.apply_chat_template(
-        messages,
-        tokenize=False,
-        add_generation_prompt=True,
+    model_name = model_name or HF_LLM_MODEL
+
+    response = requests.post(
+        "http://localhost:11434/api/chat",
+        json={
+            "model": model_name,
+            "messages": messages,
+            "stream": False,  # Ollama handles streaming differently; keep simple for now
+            "options": {
+                "temperature": temperature,
+                "top_p": top_p,
+                "num_predict": max_new_tokens,
+                "repeat_penalty": repetition_penalty,
+            }
+        },
+        timeout=120
     )
-    inputs = tokenizer(text, return_tensors="pt").to(model.device)
 
-    gen_cfg = GenerationConfig(
-        max_new_tokens=max_new_tokens,
-        do_sample=do_sample,
-        temperature=temperature if do_sample else None,
-        top_p=top_p if do_sample else None,
-        repetition_penalty=repetition_penalty,
-        pad_token_id=tokenizer.eos_token_id,
-    )
+    if response.status_code != 200:
+        raise RuntimeError(f"Ollama error {response.status_code}: {response.text}")
 
-    streamer = TextStreamer(tokenizer, skip_prompt=True) if stream else None
-
-    with torch.inference_mode():
-        output_ids = model.generate(
-            **inputs,
-            generation_config=gen_cfg,
-            streamer=streamer,
-        )
-
-    new_tokens = output_ids[0][inputs["input_ids"].shape[-1]:]
-    return tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
-
+    return response.json()["message"]["content"].strip()
 
 def generate_response(
     prompt: str,

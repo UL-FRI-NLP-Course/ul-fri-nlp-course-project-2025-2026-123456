@@ -9,7 +9,7 @@ if PROJECT_ROOT not in sys.path:
 from src.services.rag_service import handle_query, handle_query_raw_llm
 from src.config import FAISS_INDEX_PATH
 from src.db.database import init_db
-from src.services.llm import init_llm
+# from src.services.llm import init_llm
 from src.ingestion.embedder import init_embedder
 
 def init_rag():
@@ -26,7 +26,7 @@ def init_rag():
     init_embedder()
 
 def main(raw_llm=False):
-    init_llm()
+    # init_llm()
 
     if raw_llm:
         print("Running in raw LLM mode (no RAG context or database recommendations)")

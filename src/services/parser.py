@@ -13,7 +13,7 @@ if repo_root not in sys.path:
 #     sys.path.insert(0, src_dir)
 
 from src.config import CARAPI_COLUMN_EMBEDDINGS_FILE, COLUMN_EMBEDDING_THRESHOLD
-from src.services.llm import generate_json, init_llm
+from src.services.llm import generate_json # , init_llm
 from src.ingestion.embedder import embed_query
 from src.db.carapi_column_embeddings import load_column_embeddings, print_top_k_columns
 from src.db.carapi_schema import CARAPI_SCHEMA_METADATA
@@ -127,6 +127,9 @@ def extract_related_columns(query):
     embeddings, metadata = load_column_embeddings(embeddings_path=CARAPI_COLUMN_EMBEDDINGS_FILE)
 
     query_embedding = embed_query(query)
+
+    assert embeddings.shape[1] == query_embedding.shape[0], \
+        f"Embedding mismatch: {embeddings.shape[1]} vs {query_embedding.shape[0]}"
 
     scores = np.dot(embeddings, query_embedding)
 

@@ -60,74 +60,105 @@ def generate_raw_prompt(query: str):
 
 def handle_query(query: str):
 
-    # probably bo to do step 3 slo vse v conversation.py
-
+    # -------------------------
     # Step 1: Parse query
-    parsed = parse_query(query)
+    # -------------------------
+    parsed_list = parse_query(query)
+
+    # Normalize into dict (SAFE + CONSISTENT FORMAT)
+    parsed = {}
+
+    for item in parsed_list:
+
+        if not isinstance(item, dict):
+            continue
+
+        name = item.get("name")
+        if not name:
+            continue
+
+        parsed[name] = {
+            "value": item.get("value"),
+            "constraint": item.get("constraint")
+        }
+
     print(f"Query: {query}\n")
     print(f"Parsed query: {parsed}\n")
 
-    # Step 2: Query DB for cars matching constraints
+    # -------------------------
+    # Step 2: DB Query
+    # -------------------------
     db_cars = query_carapi_by_constraints(parsed, limit=20)
     db_cars_list = cars_to_dicts(db_cars)
 
-
-    # here I should add a system that checks whether there too many car in the list
-    # if yes and also if not all constraints are already filled, LLM should ask a person about the missing data (at least most important one)
-    # if there is 0 cars, ask a person to lower standards
-    # if its between 1 and TOO_BROAD_THRESHOLD, continue without asking
     print(f"extracted constraints:\n{parsed}")
-    print(f"extracted {len(db_cars_list)}")
+    print(f"extracted {len(db_cars_list)} cars")
 
-    # count empty list constraints
-    empty_lists = 0
+    # -------------------------
+    # Count missing constraints properly
+    # -------------------------
+    empty_constraints = 0
+
     for key, value in parsed.items():
-        if isinstance(value, list) and len(value) == 0:
-            empty_lists += 1
-        elif value is None:
-            empty_lists += 1
-    print(f"number of empty constraints: {empty_lists}")
+        if value is None:
+            empty_constraints += 1
+        elif isinstance(value, dict):
+            if value.get("value") in (None, "", []):
+                empty_constraints += 1
 
+    print(f"number of empty constraints: {empty_constraints}")
 
-    # case 1: no matching cars
+    # -------------------------
+    # Case 1: no matches
+    # -------------------------
     if len(db_cars_list) == 0:
         return {
             "recommendations": [],
-            # maybe we can do another LLM that will be able to tell which constraints to relax
-            # like maybe contradicting ones - big car + small consumption
             "response": (
                 "I couldn't find cars matching all your requirements. "
-                "You could try increasing the budget or relaxing some constraints."
+                "Try increasing your budget or relaxing some constraints."
             )
         }
 
-    # case 2: too many matching cars + missing information
-    if len(db_cars_list) > TOO_BROAD_THRESHOLD and empty_lists >= 2:
-        make_conversation()
+    # -------------------------
+    # Case 2: too broad + missing info
+    # -------------------------
+    if len(db_cars_list) > TOO_BROAD_THRESHOLD and empty_constraints >= 2:
+        return make_conversation(parsed)
 
-
-    # Step 3: Retrieve FAISS context based on parsed query terms
+    # -------------------------
+    # Step 3: FAISS retrieval
+    # -------------------------
     candidates, context = retrieve_candidates(parsed, k=10)
 
-    # Step 4: Build a mapping of FAISS candidate sources to cars
-    # and merge DB results with FAISS scores
-    faiss_scores = {c.get("source", ""): c.get("score", 0.0) for c in candidates}
+    # -------------------------
+    # Step 4: Merge FAISS scores
+    # -------------------------
+    faiss_scores = {
+        c.get("source", ""): c.get("score", 0.0)
+        for c in candidates
+        if isinstance(c, dict)
+    }
 
-    # Combine DB cars with FAISS scores
-    # (cars from DB are already filtered by constraints)
+    # Attach FAISS score safely
     for car in db_cars_list:
         source_key = f"{car.get('brand', '')} {car.get('model', '')}"
-        # Normalize FAISS score to [0, 1]
         car["faiss_score"] = min(faiss_scores.get(source_key, 0.3), 1.0)
 
-    # If no DB matches, broaden to the full CarAPI dataset.
+    # -------------------------
+    # Fallback if DB empty
+    # -------------------------
     if not db_cars_list:
         db_cars_list = get_all_carapi_cars(limit=20)
 
-    # Step 5: Rank combined results
+    # -------------------------
+    # Step 5: Ranking
+    # -------------------------
     ranked = rank_cars(db_cars_list, parsed)
 
-    # Step 6: Generate response
+    # -------------------------
+    # Step 6: LLM response
+    # -------------------------
     prompt = generate_prompt(query, parsed, ranked, context)
     response = generate_response(prompt)
 

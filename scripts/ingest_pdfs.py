@@ -12,7 +12,7 @@ from scripts.get_pdf_data import get_brand_model_year
 from src.ingestion.chunker import extract_chunks
 from src.ingestion.embedder import embed
 from src.ingestion.faiss_store import build_faiss_index, save_index, save_metadata
-from src.config import PDF_ROOT, VECTOR_STORE_DIR, FAISS_INDEX_PATH, METADATA_PATH, SENTENCE_TRANSFORMER_MODEL
+from src.config import PDF_ROOT, VECTOR_STORE_DIR, FAISS_INDEX_PATH, METADATA_PATH, EMBEDDING_MODEL # , SENTENCE_TRANSFORMER_MODEL
 import numpy as np
 
 def build_corpus(pdf_path):
@@ -52,8 +52,8 @@ def main():
             print(f"    Extracted {len(chunks)} chunks")
 
     print("\n[3] Computing embeddings...")
-    print(f"  Using model: {SENTENCE_TRANSFORMER_MODEL}")
-    embeddings = embed(all_chunks)
+    print(f"  Using model: {EMBEDDING_MODEL}")
+    embeddings = embed(all_chunks, model_name=EMBEDDING_MODEL, batch_size=64)
     print(f"  Shape: {embeddings.shape}")
 
     print("\n[4] Building FAISS index...")

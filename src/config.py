@@ -8,11 +8,16 @@ load_dotenv("./.env")
 DB_URL = os.getenv("DATABASE_URL")
 
 # Embeddings and RAG
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")
+EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL",
+    "sentence-transformers/all-MiniLM-L6-v2"
+)
 COLUMN_EMBEDDING_THRESHOLD = float(os.getenv("COLUMN_EMBEDDING_THRESHOLD", "0.49"))
 
-HF_LLM_MODEL = os.getenv("HF_LLM_MODEL", "Qwen/Qwen2.5-14B-Instruct")
-HF_LLM_PARSING_MODEL = os.getenv("HF_LLM_PARSING_MODEL", "Qwen/Qwen2.5-14B-Instruct")
+# HF_LLM_MODEL = os.getenv("HF_LLM_MODEL", "Qwen/Qwen2.5-14B-Instruct")
+# HF_LLM_PARSING_MODEL = os.getenv("HF_LLM_PARSING_MODEL", "Qwen/Qwen2.5-14B-Instruct")
+HF_LLM_MODEL = os.getenv("HF_LLM_MODEL", "mistral")
+HF_LLM_PARSING_MODEL = os.getenv("HF_LLM_PARSING_MODEL", HF_LLM_MODEL)
 USE_4BIT_QUANTIZATION = os.getenv("USE_4BIT_QUANTIZATION", "true").lower() == "true"
 
 BASE_DIR = Path(__file__).resolve().parent.parent
