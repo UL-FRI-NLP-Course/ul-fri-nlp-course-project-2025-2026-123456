@@ -12,19 +12,19 @@ if repo_root not in sys.path:
 from src.db.database import engine
 
 
-def normalize_constraint_name(name: str) -> str:
+def _normalize_constraint_name(name: str) -> str:
     return (name or "").strip().lower()
 
 
 def _build_constraint_clause(constraint: dict, params: dict, index: int):
     name = constraint.get("name")
     value = constraint.get("value")
-    op = normalize_constraint_name(constraint.get("constraint"))
+    op = _normalize_constraint_name(constraint.get("constraint"))
 
     if not name or op in {"", "none", "null"}:
         return None
 
-    column = normalize_constraint_name(name)
+    column = _normalize_constraint_name(name)
 
     if value is None:
         return None
@@ -114,7 +114,7 @@ def build_filter_clauses(constraints: list[dict]):
         if not name or value is None:
             continue
 
-        column = normalize_constraint_name(name)
+        column = _normalize_constraint_name(name)
 
         if isinstance(value, (list, tuple)):
             valid_values = [v for v in value if value_exists_in_column(column, v)]
@@ -159,7 +159,7 @@ def value_exists_in_column(column_name: str, value) -> bool:
     valid_columns = {column["name"] for column in inspector.get_columns("carapi_cars")}
 
     if column_name not in valid_columns:
-        raise False
+        return False
 
     if value is None:
         return False
@@ -250,6 +250,11 @@ if __name__ == "__main__":
         {'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}
     ]
 
-    cars = query_unique_models_by_constraints(constraints)
+    constraints2 = [
+        {'name': 'seats', 'value': 7, 'constraint': 'equal'},
+        {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'},
+    ]
+
+    cars = query_unique_models_by_constraints(constraints2)
     for car in cars:
         print(car)
