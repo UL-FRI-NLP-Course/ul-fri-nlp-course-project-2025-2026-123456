@@ -181,60 +181,60 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
         sample_size = 5
     ),
 
-    "series": ColumnMetadata(
-        name="series",
-        display_name="Series",
-        description="Manufacturer-specific series or lineup grouping.",
-        user_intents=[
-            "BMW 3 series",
-            "Mercedes C class"
-        ],
-        synonyms=[
-            "series",
-            "line",
-            "vehicle line"
-        ],
-        related_terms=[
-            "model", 
-            "trim"
-        ],
-        data_type="string",
-        example_queries=[
-            "bmw 5 series",
-            "audi a series", 
-            "mercedes c class"
-        ],
-        sample_size = 5
-    ),
+    # "series": ColumnMetadata(
+    #     name="series",
+    #     display_name="Series",
+    #     description="Manufacturer-specific series or lineup grouping.",
+    #     user_intents=[
+    #         "BMW 3 series",
+    #         "Mercedes C class"
+    #     ],
+    #     synonyms=[
+    #         "series",
+    #         "line",
+    #         "vehicle line"
+    #     ],
+    #     related_terms=[
+    #         "model", 
+    #         "trim"
+    #     ],
+    #     data_type="string",
+    #     example_queries=[
+    #         "bmw 5 series",
+    #         "audi a series", 
+    #         "mercedes c class"
+    #     ],
+    #     sample_size = 5
+    # ),
 
-    "trim": ColumnMetadata(
-        name="trim",
-        display_name="Trim",
-        description="Specific trim level or configuration package.",
-        user_intents=[
-            "fully loaded",
-            "sport trim",
-            "luxury package"
-        ],
-        synonyms=[
-            "trim",
-            "variant",
-            "package",
-            "edition"
-        ],
-        related_terms=[
-            "sport",
-            "premium",
-            "limited",
-            "luxury"
-        ],
-        data_type="string",
-        example_queries=[
-            "sport trim suv",
-            "premium package"
-        ], 
-        sample_size = 5
-    ),
+    # "trim": ColumnMetadata(
+    #     name="trim",
+    #     display_name="Trim",
+    #     description="Specific trim level or configuration package.",
+    #     user_intents=[
+    #         "fully loaded",
+    #         "sport trim",
+    #         "luxury package"
+    #     ],
+    #     synonyms=[
+    #         "trim",
+    #         "variant",
+    #         "package",
+    #         "edition"
+    #     ],
+    #     related_terms=[
+    #         "sport",
+    #         "premium",
+    #         "limited",
+    #         "luxury"
+    #     ],
+    #     data_type="string",
+    #     example_queries=[
+    #         "sport trim suv",
+    #         "premium package"
+    #     ], 
+    #     sample_size = 5
+    # ),
 
     "msrp": ColumnMetadata(
         name="msrp",

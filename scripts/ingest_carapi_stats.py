@@ -239,6 +239,10 @@ def ingest_brand(session, brand, files):
                 if k2 in allowed_cols:
                     out[k2] = v
                     continue
+
+        # BMW data has model/series semantics reversed in source files.
+        if brand.lower() in ["bmw", "mercedes-benz"]:
+            out["model"], out["series"] = out.get("series"), out.get("model")
         return out
 
     for car_id, car_data in merged.items():

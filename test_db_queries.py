@@ -52,7 +52,7 @@ def get_makes_and_count(session):
 
 def print_unique_column_values(label, values):
     print(f"\nUnique {label}:")
-    for value in sorted(values):
+    for value in sorted(values)[:10]:
         print(f"  {value}")
 
 
@@ -82,7 +82,7 @@ def main():
         # 4. Sample query by make
         print_section("4. SAMPLE QUERY")
 
-        make = "Toyota"
+        make = "BMW"
 
         cars = session.query(CarApiCar).filter(
             CarApiCar.make.ilike(make)
