@@ -6,7 +6,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.config import DATA_DIR, EMBEDDING_MODEL
+from src.config import DATA_DIR, EMBEDDING_MODEL, CARAPI_COLUMN_EMBEDDINGS_FILE
 from src.db.carapi_schema import CarApiCar
 from src.db.database import engine, init_db
 from src.db.carapi_column_embeddings import build_and_save_column_embeddings
@@ -290,8 +290,7 @@ def main():
 
 
     # Generate column embeddings for Carapi data
-    embeddings_path = os.path.join(DATA_DIR, f"carapi_column_embeddings.npy")
-    build_and_save_column_embeddings(model_name=EMBEDDING_MODEL, embeddings_path=embeddings_path, clear=args.clear)
+    build_and_save_column_embeddings(model_name=EMBEDDING_MODEL, embeddings_path=CARAPI_COLUMN_EMBEDDINGS_FILE, clear=args.clear)
     
 if __name__ == "__main__":
     main()

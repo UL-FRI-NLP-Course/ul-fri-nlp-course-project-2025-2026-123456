@@ -3,187 +3,187 @@ import json
 import os
 import sys
 from typing import Any, Dict
+import numpy as np
 
 src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 repo_root = os.path.abspath(os.path.join(src_dir, ".."))
 if repo_root not in sys.path:
     sys.path.insert(0, repo_root)
-if src_dir not in sys.path:
-    sys.path.insert(0, src_dir)
+# if src_dir not in sys.path:
+#     sys.path.insert(0, src_dir)
 
-from src.services.llm import generate_response
+from src.config import CARAPI_COLUMN_EMBEDDINGS_FILE, COLUMN_EMBEDDING_THRESHOLD
+from src.services.llm import generate_json, init_llm
+from src.ingestion.embedder import embed_query
+from src.db.carapi_column_embeddings import load_column_embeddings, print_top_k_columns
+from src.db.carapi_schema import CARAPI_SCHEMA_METADATA
+from src.db.carapi_queries import get_unique_values_from_column
 
-_BUDGET_PATTERNS = [
-    #re.compile(r"(?:budget|price|cost|spend(?:ing)?)\s*(?:is|of|around|about|under|below|max(?:imum)?)?\s*[$€£]?\s*(\d{1,3}(?:[.,]\d{3})*|\d+)(?:\s*(k|thousand))?", re.I),
-    #re.compile(r"[$€£]\s*(\d{1,3}(?:[.,]\d{3})*|\d+)(?:\s*(k|thousand))?", re.I),
-    #re.compile(r"(\d{1,3}(?:[.,]\d{3})*|\d+)\s*(k|thousand)\s*(?:euros?|dollars?|usd|eur)?", re.I),
-    # ^ doesnt work if i put 1000 (?)
-    # added "up to" and "e"
-    re.compile(r"(?:budget|price|cost|spend(?:ing)?)\s*(?:is|of|around|about|under|below|max(?:imum)?|up to)?\s*[$€£]?\s*(\d+(?:[.,]\d+)?)(?:\s*(k|thousand))?", re.I),
-    re.compile(r"[$€£]\s*(\d+(?:[.,]\d+)?)(?:\s*(k|thousand))?", re.I),
-    re.compile(r"(\d+(?:[.,]\d+)?)(?:\s*(k|thousand))\s*(?:euros?|dollars?|usd|eur|e)?", re.I),
-]
+COLUMN_EXTRACTION_SYSTEM_PROMPT = (
+    "You are a structured data extraction assistant for a car search engine. "
+    "You output ONLY valid JSON with no explanation, no markdown, no code fences."
+)
 
-_FUEL_KEYWORDS = {
-    "electric": ["electric", "ev", "battery electric", "bev"],
-    "hybrid": ["hybrid", "phev", "plug-in hybrid", "plug in hybrid"],
-    "diesel": ["diesel"],
-    "petrol": ["petrol", "gasoline", "gas"],
-}
+def build_extraction_prompt(query, column):
+    spec_lines = [
+        f"Name : {column}",
+        f"Display name: {CARAPI_SCHEMA_METADATA[column].display_name}.",
+        f"Description : {CARAPI_SCHEMA_METADATA[column].description}.",
+        f"Data type: {CARAPI_SCHEMA_METADATA[column].data_type}.",
+    ]
 
-_BODY_STYLES = {
-    "suv": ["suv", "crossover", "cross-over"],
-    "sedan": ["sedan", "saloon", "limousine"],
-    "hatchback": ["hatchback", "hatch"],
-    "wagon": ["wagon", "estate", "touring"],
-    "coupe": ["coupe", "coupé"],
-    "van": ["van", "mpv", "minivan", "people mover"],
-    "pickup": ["pickup", "pick-up", "truck"],
-}
+    if CARAPI_SCHEMA_METADATA[column].unit:
+        spec_lines.append(f"Unit: {CARAPI_SCHEMA_METADATA[column].unit}.")
+    
+    spec_lines.append(f"Synonyms: {', '.join(CARAPI_SCHEMA_METADATA[column].synonyms)}")
 
-_SIZE_KEYWORDS = {
-    "small": ["small", "compact", "city", "urban"],
-    "medium": ["medium", "mid-size", "midsize", "family"],
-    "large": ["large", "big", "full-size", "spacious"],
-}
+    sample_size = CARAPI_SCHEMA_METADATA[column].sample_size
+    if sample_size is not None:
+        sample_values = get_unique_values_from_column(column, limit=sample_size)
+        spec_lines.append(f"Allowed values: {', '.join(str(v) for v in sample_values)}.")
 
-_USE_CASE_KEYWORDS = {
-    "family": ["family", "kids", "child", "child seat"],
-    "city": ["city", "urban", "commute", "commuting"],
-    "road_trip": ["road trip", "travel", "long distance", "highway"],
-    "offroad": ["offroad", "off-road", "4x4", "all terrain"],
-    "sport": ["sport", "fast", "performance", "fun to drive"],
-}
+    column_spec = "\n".join(spec_lines)
 
+    prompt = f"""Extract the value for the database column below from the user query.
 
+## Column definition
+{column_spec}
 
-def _extract_budget(query: str):
-    for pattern in _BUDGET_PATTERNS:
-        match = pattern.search(query)
-        if not match:
-            continue
+## Constraint types
+- "equal" - user wants exactly this value  (e.g. "7 seats", "sedan")
+- "min"   - user wants at least this value  (e.g. "at least 5 seats")
+- "max"   - user wants at most this value   (e.g. "under $30 000", "affordable")
+- "range" - user gives a range; return value as [low, high]
+- null    - this column cannot be determined from the query
 
-        raw_value = match.group(1).replace(",", "").replace(" ", "")
-        multiplier = match.group(2)
-        value = float(raw_value)
-        if multiplier and multiplier.lower() in {"k", "thousand"}:
-            value *= 1000
-        return int(value)
+## Rules
+1. If the column value is clearly stated or strongly implied, extract it.
+2. Vague words like "affordable" or "spacious" are NOT sufficient — set value and constraint to null.
+3. If Allowed values are specified, the extracted value must be one of them.
+4. Return ONLY the JSON object below, nothing else.
 
-    return None
+## User query
+"{query}"
+
+## Output format
+{{"name": "{column}", "value": <extracted value or null>, "constraint": <"equal"|"min"|"max"|"range"|null>}}"""
+    
+    return prompt
 
 
-def _find_keywords(query: str, keyword_map: dict):
-    found = []
-    lower_query = query.lower()
-    for label, variants in keyword_map.items():
-        for variant in variants:
-            if variant in lower_query:
-                found.append(label)
-                break
-    return found
+def build_extraction_prompt_2(query, column):
+
+    sample_size = CARAPI_SCHEMA_METADATA[column].sample_size
+    if sample_size is not None:
+        sample_values = get_unique_values_from_column(column, limit=sample_size)
+        values = f"Allowed values: {', '.join(str(v) for v in sample_values)}."
+        allowed_values = f"Extracted value must be one of the following: {', '.join(str(v) for v in sample_values)}."
 
 
-def extract_consumption(query):
+    prompt = f"""Extract the value for the car database column {column} ({CARAPI_SCHEMA_METADATA[column].description}) from the user query.
+    {allowed_values if sample_size is not None else ""}
 
-    p1 = r"(low|small|minimal)\s+consumption"
-    p2 = r"consumption\s*(?:is|of|around|about|under|below|max(?:imum)?|up to)?\s*(\d+(?:\.\d+)?)\s*l(?:/100km)?"
+Constraint types:
+- "equal" - user wants exactly this value  (e.g. "7 seats", "sedan")
+- "min"   - user wants at least this value  (e.g. "at least 5 seats")
+- "max"   - user wants at most this value   (e.g. "under $30 000", "affordable")
+- "range" - user gives a range; return value as [low, high]
+- null    - this column cannot be determined from the query
 
-    # search if user provided adjective (small...) and set manually consumption to idk, 4L/100km
-    match = re.search(p1, query)
+If the value cannot be extracted with high confidence, return null for both value and constraint.
 
-    if match:
+## User query
+"{query}"
 
-        # delete these words from query so that they don't get mixed up with other extractions
-        full_match = match.group(0)
-        cleaned_query = query.replace(full_match, "")
-
-        consumption_value = 4.0
-
-        return consumption_value, cleaned_query
-
-    # search if user provided a maximum number of consumption
-    match = re.search(p2, query)
-    if match:
-
-        consumption_value = float(match.group(1))
-
-        # delete these words from query so that they don't get mixed up with other extractions
-        full_match = match.group(0)
-        cleaned_query = query.replace(full_match, "")
-
-        return consumption_value, cleaned_query
+## Output format
+{{"name": "{column}", "value": <extracted value or null>, "constraint": <"equal"|"min"|"max"|"range"|null>}}"""
+    
+    return prompt
 
 
-    return None, query
+def build_extraction_prompt_3(query, column):
+
+    sample_size = CARAPI_SCHEMA_METADATA[column].sample_size
+    if sample_size is not None:
+        sample_values = get_unique_values_from_column(column, limit=sample_size)
+        values = f"Allowed values: {', '.join(str(v) for v in sample_values)}."
+        allowed_values = f"Extracted value(s) must be from the following list: {', '.join(str(v) for v in sample_values)}."
+
+
+    prompt = f"""Extract the value and constraint for the car database column {column} ({CARAPI_SCHEMA_METADATA[column].description}) from the user query.
+    {allowed_values if sample_size is not None else ""}
+
+If the value cannot be extracted with high confidence, return null for both value and constraint.
+
+## User query
+"{query}"
+
+## Output format
+{{"name": "{column}", "value": <extracted value or null>, "constraint": <"equal"|"min"|"max"|"range"|null>}}"""
+    
+    return prompt
+
+def extract_related_columns(query):
+    embeddings, metadata = load_column_embeddings(embeddings_path=CARAPI_COLUMN_EMBEDDINGS_FILE)
+
+    query_embedding = embed_query(query)
+
+    scores = np.dot(embeddings, query_embedding)
+
+    accepted_indices = np.where(scores > COLUMN_EMBEDDING_THRESHOLD)[0]
+    related_columns = [metadata[idx].name for idx in accepted_indices]
+
+    return related_columns
 
 
 def parse_query(query: str):
-    # TO DO - implement parsing with the column embeddings and retrieval
-    # 1. First find related columns
-    # 2. Extract relevant values for these columns with LLM
-    # 3. Ask questions about related columns that cannot be extracted (e.g. "what is your budget?" if budget is relevant but not mentioned in query)
+    related_columns = extract_related_columns(query)
 
-    return heuristic_parse_query(query)
+    column_fields = []
 
-    prompt = (
-        "You are a JSON extractor. Given a user's natural-language car query and a "
-        "schema (JSON) describing available fields, extract the intent and produce a "
-        "JSON object mapping field names to values. Only include keys that appear in "
-        "the schema. Use types: number for numeric fields, string for free text, list "
-        "for categorical multiple values. If a field is not mentioned, omit it or set "
-        "it to null. Return ONLY valid JSON (no surrounding explanation).\n\n"
-        f"Schema: {json.dumps(schema, ensure_ascii=False)}\n\n"
-        f"User query: {normalized}\n\n"
-        "Output:"
-    )
+    for column in related_columns:
+        prompt = build_extraction_prompt_2(query, column)
+        response = generate_json(COLUMN_EXTRACTION_SYSTEM_PROMPT, prompt, column)
+        column_fields.append(response)
 
-    llm_out = generate_response(prompt)
+    return column_fields
 
-def heuristic_parse_query(normalized: str) -> Dict[str, Any]:
-    lower = normalized.lower()
-
-    # adding consumption and also delete part of consumption out of query
-    # because before it didn't work for smth like "big car and small consumption" -> sizes=[big, small]
-    max_consumption, removed_adj = extract_consumption(lower)
-
-    budget_max = _extract_budget(normalized)
-    fuel_types = _find_keywords(lower, _FUEL_KEYWORDS)
-    body_styles = _find_keywords(lower, _BODY_STYLES)
-    sizes = _find_keywords(removed_adj, _SIZE_KEYWORDS)
-    use_cases = _find_keywords(lower, _USE_CASE_KEYWORDS)
-
-    seating_min = None
-    seat_match = re.search(r"(\d{1,2})\s*(?:seats?|seat|people|passengers?)", lower)
-    if seat_match:
-        seating_min = int(seat_match.group(1))
-
-    transmission = None
-    if any(term in lower for term in ["automatic", "auto"]):
-        transmission = "automatic"
-    elif any(term in lower for term in ["manual"]):
-        transmission = "manual"
-
-    terms = [normalized]
-    for bucket in (fuel_types, body_styles, sizes, use_cases):
-        terms.extend(bucket)
-
-    if budget_max is not None:
-        terms.append(f"budget {budget_max}")
-
-    return {
-        "query": normalized,
-        "budget_max": budget_max,
-        "fuel_types": fuel_types,
-        "body_styles": body_styles,
-        "sizes": sizes,
-        "use_cases": use_cases,
-        "seating_min": seating_min,
-        "transmission": transmission,
-        "terms": terms,
-    }
+def format_parsed_response(response):
+    for r in response:
+        name = r.get("name")
+        value = r.get("value")
+        constraint = r.get("constraint")
+        print(f"{name:>20}: {value} ({constraint})")
 
 if __name__ == "__main__":
-    user_query = "I'm looking for a spacious SUV under $30k with low consumption, preferably electric or hybrid, for family road trips. It should have at least 5 seats and an automatic transmission."
-    parsed = parse_query(user_query)
-    print(json.dumps(parsed, indent=2, ensure_ascii=False))
+    init_llm()
+
+    query = "I want an affordable familiy SUV with 7 seats."
+    print(f"Query: {query}")
+    response = parse_query(query)
+    format_parsed_response(response)
+    print()
+
+    query = "I am on a strict budget, so I am looking for something under 20k. USD"
+    print(f"Query: {query}")
+    response = parse_query(query)
+    format_parsed_response(response)
+    print()
+
+    query = "I want a sporty coupe with at least 300 hp and rear wheel drive."
+    print(f"Query: {query}")
+    response = parse_query(query)
+    format_parsed_response(response)
+    print()
+
+    query = "I'm looking for a spacious SUV under 30.000 USD with low consumption, preferably electric or hybrid, for family road trips. It should have at least 5 seats and an automatic transmission."
+    print(f"Query: {query}")
+    response = parse_query(query)
+    format_parsed_response(response)
+    print()
+
+    query = "Truck with good towing capacity, preferably diesel, for off-road and road trips, budget up to 50k."
+    print(f"Query: {query}")
+    response = parse_query(query)
+    format_parsed_response(response)
+    print()

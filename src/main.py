@@ -10,6 +10,7 @@ from src.services.rag_service import handle_query, handle_query_raw_llm
 from src.config import FAISS_INDEX_PATH
 from src.db.database import init_db
 from src.services.llm import init_llm
+from src.ingestion.embedder import init_embedder
 
 def init_rag():
     if not os.path.exists(FAISS_INDEX_PATH):
@@ -21,6 +22,8 @@ def init_rag():
         init_db()
     except Exception as e:
         print(f"Warning: Could not initialize database: {e}")
+
+    init_embedder()
 
 def main(raw_llm=False):
     init_llm()

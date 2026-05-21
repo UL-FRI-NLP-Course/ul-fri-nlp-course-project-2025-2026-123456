@@ -85,8 +85,8 @@ class ColumnMetadata:
     synonyms: List[str] = field(default_factory=list)
     related_terms: List[str] = field(default_factory=list)
 
-    units: Optional[str] = None
-    value_type: Optional[str] = None
+    unit: Optional[str] = None
+    data_type: Optional[str] = None
 
     example_queries: List[str] = field(default_factory=list)
 
@@ -119,7 +119,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "redesign",
             "facelift"
         ],
-        value_type="integer",
+        data_type="integer",
         example_queries=[
             "bmw after 2020",
             "2019 suv",
@@ -148,7 +148,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "performance brands",
             "economy brands"
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
             "black BMW",
             "Toyota hybrid",
@@ -172,13 +172,13 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
            "series",
            "trim",
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
             "I want a BMW x5",
             "I am very happy with my old Honda Civic and would like to find something similar",
             "Considering a Ford F-150 or a Chevrolet Silverado"
         ],
-        sample_size = None
+        sample_size = 5
     ),
 
     "series": ColumnMetadata(
@@ -198,7 +198,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "model", 
             "trim"
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
             "bmw 5 series",
             "audi a series", 
@@ -228,7 +228,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "limited",
             "luxury"
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
             "sport trim suv",
             "premium package"
@@ -241,11 +241,11 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
         display_name="MSRP",
         description="The manufacturer's suggested retail price for the vehicle.",
         user_intents=[
-            "find cars under $30,000",
+            "find cars under a certain price",
             "compare prices",
-            "budget friendly",
-            "find cheap cars",
+            "budget friendly options"
             "good value for money"
+            "set a maximum price limit / budget"
         ],
         synonyms=[
             "price",
@@ -259,13 +259,15 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "budget",
             "cheap",
         ],
-        value_type="float",
+        unit="USD, $",
+        data_type="float",
         example_queries=[
             "vehicles under 30000 dollars",
-            "wont break the bank",
-            "affordable suvs",
-            "good value car", 
-            "my budget is around 25000 dollars"
+            "Something that wont break the bank",
+            "Looking for an affordable SUVs",
+            "good value for money", 
+            "price doesn't matter I just want the best car I can get"
+            "cars up to $20k"
         ]
     ),
 
@@ -274,10 +276,9 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
         display_name="Body Type",
         description="Vehicle body style classification.",
         user_intents=[
-            "SUV",
-            "sedan",
-            "wagon",
-            "pickup"
+            "find exact body type like suvs, hatchbacks, coupes",
+            "find car for a specific use case like offroading, family trips, city driving",
+            "match user's need: work vehicle: truck or van, family car: suv or minivan, sporty car: coupe or convertible, efficient city car: hatchback or compact sedan", 
         ],
         synonyms=[
             "body type",
@@ -293,13 +294,13 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "practical",
             "offroad"
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
-            "two seater sports car",
-            "a lot of space for passengers and cargo",
-            "car with offroad capability",
+            "two seater sports coupe",
+            "SUV witha lot of space for passengers and cargo",
+            "truck for work",
             "familiy wagon",
-            "fun weekend car"
+            "comfortable sedan"
         ], 
         sample_size = None
     ),
@@ -323,7 +324,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "spacious",
             "practical"
         ],
-        value_type="integer",
+        data_type="integer",
         example_queries=[
             "4 door suv",
             "2 door sports car", 
@@ -352,8 +353,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "handling", 
             "spacious"
         ],
-        units="cm",
-        value_type="integer",
+        unit="cm",
+        data_type="integer",
         example_queries=[
             "a lot of pasanger space",
             "luxury sedan with large back seats",
@@ -383,8 +384,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "good handling", 
             "spacious"
         ],
-        units="cm",
-        value_type="integer",
+        unit="cm",
+        data_type="integer",
         example_queries=[
             "induvidual seats in the back",
             "thee captain chairs in the back",
@@ -413,7 +414,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "7 seater",
             "family"
         ],
-        value_type="integer",
+        data_type="integer",
         example_queries=[
             "7 seat suv",
             "family van", 
@@ -441,8 +442,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "tall",
             "low"
         ],
-        units="cm",
-        value_type="integer",
+        unit="cm",
+        data_type="integer",
         example_queries=[
             "cargo van with high ceiling",
             "van with standing height",
@@ -475,8 +476,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "nimble",
             "good handling"
         ],
-        units="cm",
-        value_type="float",
+        unit="cm",
+        data_type="float",
         example_queries=[
             "stable highway ride",
             "long wheelbase luxury sedan",
@@ -510,8 +511,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "4x4",
             "four wheel drive"
         ],
-        units="cm",
-        value_type="float",
+        unit="cm",
+        data_type="float",
         example_queries=[
             "suv with offroad capability",
             "high ground clearance for rough roads",
@@ -541,8 +542,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "large trunk",
             "enough space for luggage"
         ],
-        units="liters",
-        value_type="integer",
+        unit="liters",
+        data_type="integer",
         example_queries=[
             "suv with a lot of space for big family trips",
             "cargo van for moving",
@@ -569,8 +570,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "light",
             "power to weight ratio",
         ],
-        units="kg",
-        value_type="integer",
+        unit="kg",
+        data_type="integer",
         example_queries=[
             "lightweight car for better fuel efficiency",
             "heavy duty truck for towing", 
@@ -598,8 +599,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "truck",
             "heavy loads"
         ],
-        units="kg",
-        value_type="integer",
+        unit="kg",
+        data_type="integer",
         example_queries=[
             "truck with high payload capacity",
             "vehicle for heavy loads",
@@ -627,8 +628,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "truck",
             "towing"
         ],
-        units="kg",
-        value_type="integer",
+        unit="kg",
+        data_type="integer",
         example_queries=[
             "truck with high towing capacity",
             "vehicle for towing",
@@ -665,7 +666,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "PHEV",
             "ev"
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
             "electric suv",
             "diesel bmw",
@@ -696,7 +697,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "v12"
             "i6"
         ],
-        value_type="integer",
+        data_type="integer",
         example_queries=[
             "car with powerful v6 engine",
             "bmw with the inline 6 cylinder engine",
@@ -729,8 +730,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "turbocharged",
             "naturally aspirated"
         ],
-        units="liters",
-        value_type="float",
+        unit="liters",
+        data_type="float",
         example_queries=[
             "car with 2.0 liter engine",
             "small engine for better fuel economy",
@@ -761,8 +762,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "fast",
             "sporty"
         ],
-        units="hp",
-        value_type="integer",
+        unit="hp",
+        data_type="integer",
         example_queries=[
             "300hp suv",
             "fast electric car",
@@ -789,8 +790,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "engine strength", 
             "low end torque"
         ],
-        units="Nm",
-        value_type="integer",
+        unit="Nm",
+        data_type="integer",
         example_queries=[
             "high torque diesel",
             "good towing suv",
@@ -824,7 +825,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "front wheel drive",
             "rear wheel drive"
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
             "all wheel drive suv",
             "four wheel drive offroad car", 
@@ -856,7 +857,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "dual clutch", 
             "6-speed",
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
             "sports car with manual transmission",
             "sports car with dual clutch transmission",
@@ -890,7 +891,7 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "hybrid",
             "petrol",
         ],
-        value_type="string",
+        data_type="string",
         example_queries=[
             "looking for an electric car",
             "diesel car with good fuel economy",
@@ -919,8 +920,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "large fuel tank",
             "fuel efficient"
         ],
-        units="liters",
-        value_type="integer",
+        unit="liters",
+        data_type="integer",
         example_queries=[
             "car with long range between fill ups",
             "suv with large fuel tank",
@@ -949,8 +950,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "low fuel usage"
             "ecological"
         ],
-        units="L/100km",
-        value_type="float",
+        unit="L/100km",
+        data_type="float",
         example_queries=[
             "fuel efficient hybrid",
             "car with low fuel consumption", 
@@ -978,8 +979,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
     #         "stop and go traffic",
     #         "fuel efficient"
     #     ],
-    #     units="L/100km",
-    #     value_type="float",
+    #     unit="L/100km",
+    #     data_type="float",
     #     example_queries=[
     #         "suv with good city fuel economy",
     #         "car that is efficient in stop and go traffic",
@@ -1007,8 +1008,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
     #         "long distance travel",
     #         "fuel efficient"
     #     ],
-    #     units="L/100km",
-    #     value_type="float",
+    #     unit="L/100km",
+    #     data_type="float",
     #     example_queries=[
     #         "suv with good highway fuel economy",
     #         "car that is efficient on the highway",
@@ -1036,8 +1037,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
     #         "urban range",
     #         "fuel efficient"
     #     ],
-    #     units="km",
-    #     value_type="integer",
+    #     unit="km",
+    #     data_type="integer",
     #     example_queries=[
     #         "suv with long city range",
     #         "car that is good for urban driving",
@@ -1064,8 +1065,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "long distance travel",
             "fuel efficient"
         ],
-        units="km",
-        value_type="integer",
+        unit="km",
+        data_type="integer",
         example_queries=[
             "suv with long highway range",
             "car that is good for long distance travel",
@@ -1098,8 +1099,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "electric vehicle",
             "long range"
         ],
-        units="kWh",
-        value_type="float",
+        unit="kWh",
+        data_type="float",
         example_queries=[
             "large battery ev",
             "80kwh battery",
@@ -1128,8 +1129,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "quick charge",
             "long range"
         ],
-        units="hours",
-        value_type="float",
+        unit="hours",
+        data_type="float",
         example_queries=[
             "fast charging electric car",
             "ev that can charge quickly on road trips",
@@ -1155,8 +1156,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "low energy usage",
             "long range"
         ],
-        units="kWh/100km",
-        value_type="float",
+        unit="kWh/100km",
+        data_type="float",
         example_queries=[
             "efficient electric car with low energy consumption",
             "ev with long range and low kwh per 100km",
@@ -1183,8 +1184,8 @@ CARAPI_SCHEMA_METADATA: Dict[str, ColumnMetadata] = {
             "battery life",
             "long range"
         ],
-        units="km",
-        value_type="integer",
+        unit="km",
+        data_type="integer",
         example_queries=[
             "500km electric range",
             "long range tesla",

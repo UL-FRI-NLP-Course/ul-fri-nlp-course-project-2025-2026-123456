@@ -4,16 +4,18 @@ from sentence_transformers import SentenceTransformer
 
 from src.config import EMBEDDING_MODEL
 
-"""Supported embedding models:
-    Qwen/Qwen3-Embedding-0.6B
-    Qwen/Qwen3-Embedding-4B
-    BAAI/bge-large-en-v1.5 
-    BAAI/bge-m3
-    nomic-ai/nomic-embed-text-v1.5
-    thenlper/gte-large
-    google/embeddinggemma-300m
-    jinaai/jina-embeddings-v5-text-small
-    jinaai/jina-embeddings-v5-text-nano
+"""
+Supported embedding models:
+
+Qwen/Qwen3-Embedding-0.6B
+Qwen/Qwen3-Embedding-4B
+BAAI/bge-large-en-v1.5 
+BAAI/bge-m3
+nomic-ai/nomic-embed-text-v1.5
+thenlper/gte-large
+google/embeddinggemma-300m
+jinaai/jina-embeddings-v5-text-small
+jinaai/jina-embeddings-v5-text-nano
 """
 
 _model_name = None
@@ -41,6 +43,10 @@ def embed(texts, model_name: str = None, **encode_kwargs):
         **encode_kwargs,
     )
     return np.array(emb, dtype=np.float32)
+
+def init_embedder(model_name: str = None):
+    get_model(model_name)
+    print(f"Embedding model '{_model_name}' loaded successfully.\n")
 
 def embed_query(query: str, model_name: str = None):
     if model_name is None:

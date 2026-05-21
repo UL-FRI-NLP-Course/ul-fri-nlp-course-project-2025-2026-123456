@@ -16,7 +16,7 @@ def format_column_text(metadata, example_values):
         f"Display name: {metadata.display_name}.",
         f"Column name: {metadata.name if hasattr(metadata, 'name') else ''}",
         f"Description: {metadata.description}.",
-        f"Type: {metadata.value_type}.",
+        f"Type: {metadata.data_type}.",
         f"Examples: {', '.join(example_values)}.",
         f"User intents: {', '.join(metadata.user_intents)}.",
         f"Synonyms: {', '.join(metadata.synonyms)}.",
@@ -67,3 +67,14 @@ def load_column_embeddings(embeddings_path: str):
     emb = np.load(embeddings_path)
 
     return emb, list(CARAPI_SCHEMA_METADATA.values())
+
+def print_top_k_columns(scores: np.ndarray, tok_k: int =10):
+    top_indices = np.argsort(scores)[::-1][:tok_k]
+
+    column_names = list(CARAPI_SCHEMA_METADATA.keys())
+
+    print(f"Top {tok_k} columns:")
+    for idx in top_indices:
+        column_name = column_names[idx]
+        score = scores[idx]
+        print(f" - {column_name}: {score:.4f}")

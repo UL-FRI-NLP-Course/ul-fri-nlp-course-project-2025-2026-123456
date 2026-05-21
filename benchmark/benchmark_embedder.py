@@ -360,6 +360,7 @@ def print_benchmark_results(results: List[Dict]):
 
 
 if __name__ == "__main__":
-    #benchmark_models()
-    build_leave_one_out_vote_tables()
-    benchmark_models_with_leave_one_out()
+    benchmark_models()
+    
+    #build_leave_one_out_vote_tables()
+    #benchmark_models_with_leave_one_out()

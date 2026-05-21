@@ -1,0 +1,13 @@
+Ranked models:
+ #  Model                                  Agreement  Separation         F1   Threshold       Final
+---------------------------------------------------------------------------------------------------
+ 1  Qwen/Qwen3-Embedding-4B                   0.4020      1.6503     0.5794      0.5700      0.8772
+ 2  jinaai/jina-embeddings-v5-text-small      0.3966      1.6155     0.5254      0.3300      0.8458
+ 3  Qwen/Qwen3-Embedding-0.6B                 0.4026      1.5808     0.5399      0.4900      0.8411
+ 4  google/embeddinggemma-300m                0.3960      1.5922     0.5196      0.2900      0.8359
+ 5  jinaai/jina-embeddings-v5-text-nano       0.3869      1.5594     0.5460      0.3300      0.8308
+ 6  all-MiniLM-L6-v2                          0.3729      1.4423     0.5173      0.2800      0.7775
+ 7  BAAI/bge-large-en-v1.5                    0.3706      1.3997     0.4765      0.6200      0.7489
+ 8  nomic-ai/nomic-embed-text-v1.5            0.3526      1.4293     0.3987      0.6200      0.7269
+ 9  BAAI/bge-m3                               0.3468      1.2048     0.4884      0.6300      0.6800
+10  thenlper/gte-large                        0.3609      1.2576     0.3490      0.8000      0.6558
