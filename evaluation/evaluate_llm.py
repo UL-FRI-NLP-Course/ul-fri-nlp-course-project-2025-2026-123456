@@ -115,12 +115,12 @@ def evaluate(raw_llm=False, with_ollama=False):
                     for x in top_answers
                 }
 
-                if len(predicted_set) > 0:
-                    if expected_set == predicted_set[0]:
-                        correct_top1 += 1
-
-                if expected_set in predicted_set:
-                    correct_top3 += 1
+                # if len(predicted_set) > 0:
+                #     if expected_set == predicted_set[0]:
+                #         correct_top1 += 1
+                #
+                # if expected_set in predicted_set:
+                #     correct_top3 += 1
 
                 # expected_set = set(expected)
                 # predicted_set = set(top_answers)
