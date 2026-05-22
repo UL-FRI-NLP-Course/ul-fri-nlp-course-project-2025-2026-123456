@@ -11,7 +11,7 @@ DB_URL = os.getenv("DATABASE_URL")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")
 COLUMN_EMBEDDING_THRESHOLD = float(os.getenv("COLUMN_EMBEDDING_THRESHOLD", "0.49"))
 
-HF_LLM_MODEL = os.getenv("HF_LLM_MODEL", "Qwen/Qwen2.5-14B-Instruct")
+HF_LLM_MODEL = os.getenv("HF_LLM_MODEL", "Qwen/Qwen2.5-1.5B-Instruct")
 HF_LLM_PARSING_MODEL = os.getenv("HF_LLM_PARSING_MODEL", "Qwen/Qwen2.5-14B-Instruct")
 USE_4BIT_QUANTIZATION = os.getenv("USE_4BIT_QUANTIZATION", "true").lower() == "true"
 
