@@ -1,6 +1,312 @@
-Dejanski podatki: {'engine_type': 'gas', 'body_type': 'SUV', 'seats': 5, 'fuel_tank_capacity': 48}
+Dejanski podatki(BMW X) : {}
+Zahteve: [{'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz GLC-Class-Coupe) : {}
+Zahteve: [{'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}]
+
+Dejanski podatki(Infiniti QX60) : {}
+Zahteve: [{'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}]
+
+Dejanski podatki(BMW 7Series) : {}
+Zahteve: [{'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz GLS-Class) : {}
+Zahteve: [{'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz Metris) : {}
+Zahteve: [{'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz GLE-Class-Coupe) : {}
+Zahteve: [{'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz R-Class) : {}
+Zahteve: [{'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}]
+
+Nasledji test:
+Dejanski podatki(Audi A3) : {'make': 'Audi', 'msrp': 33300.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A3 Quattro) : {'make': 'Audi', 'msrp': 33300.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A3 Sportback e-tron) : {'make': 'Audi', 'msrp': 33300.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A4) : {'make': 'Audi', 'msrp': 37400.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A4 Quattro) : {'make': 'Audi', 'msrp': 37400.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A4 allroad) : {'make': 'Audi', 'msrp': 37400.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A5 Quattro) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A5 Sportback) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A6) : {'make': 'Audi', 'msrp': 49700.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A6 Quattro) : {'make': 'Audi', 'msrp': 49700.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A6 allroad) : {'make': 'Audi', 'msrp': 49700.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A7 Quattro) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A7 Sportback) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A8 Quattro) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q3) : {'make': 'Audi', 'msrp': 34700.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q3 Quattro) : {'make': 'Audi', 'msrp': 34700.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q5) : {'make': 'Audi', 'msrp': 43300.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q5 PHEV) : {'make': 'Audi', 'msrp': 43300.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q7) : {'make': 'Audi', 'msrp': 54800.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q8) : {'make': 'Audi', 'msrp': 68200.0}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Mazda CX-7) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Dejanski podatki(Mazda RX-8) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
+
+Nasledji test:
+Dejanski podatki(Cadillac ATS) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Cadillac CTS) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Cadillac ELR) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Chevrolet Camaro) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Chevrolet Corvette) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Dodge Challenger) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Dodge Viper) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz C-Class-Coupe) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz GLE-Class-Coupe) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(BMW 4SeriesGT) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz E-Class) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Mercedes Benz GLC-Class-Coupe) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Infiniti QX55) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(BMW Z4) : {'body_type': 'Convertible', 'year': 2020}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(BMW 1SeriesCoupe) : {}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Dejanski podatki(Audi Q5) : {'body_type': 'SUV', 'year': 2020}
+Zahteve: [{'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}, {'name': 'year', 'value': 2015, 'constraint': 'min'}]
+
+Nasledji test:
+Dejanski podatki(Buick Enclave) : {}
+Zahteve: [{'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'transmission', 'value': 'manual', 'constraint': 'equal'}]
+
+Dejanski podatki(BMW 1SeriesCoupe) : {}
+Zahteve: [{'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'transmission', 'value': 'manual', 'constraint': 'equal'}]
+
+Dejanski podatki(Mercedes Benz GLC-Class-Coupe) : {}
+Zahteve: [{'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'transmission', 'value': 'manual', 'constraint': 'equal'}]
+
+Dejanski podatki(Buick Envision) : {}
+Zahteve: [{'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'transmission', 'value': 'manual', 'constraint': 'equal'}]
+
+Dejanski podatki(Chevrolet Suburban) : {}
+Zahteve: [{'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'transmission', 'value': 'manual', 'constraint': 'equal'}]
+
+Dejanski podatki(Audi R8) : {'body_type': 'Coupe', 'transmission': '7-speed automated manual'}
+Zahteve: [{'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'transmission', 'value': 'manual', 'constraint': 'equal'}]
+
+Dejanski podatki(Chevrolet Tahoe) : {}
+Zahteve: [{'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'transmission', 'value': 'manual', 'constraint': 'equal'}]
+
+Nasledji test:
+Dejanski podatki(Audi A3) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A3 Quattro) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A3 Sportback e-tron) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A4) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A4 Quattro) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A4 allroad) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A5 Quattro) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A5 Sportback) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A6) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A6 Quattro) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A6 allroad) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A7 Quattro) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A7 Sportback) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi A8 Quattro) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q3) : {'make': 'Audi', 'body_type': 'SUV', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q3 Quattro) : {'make': 'Audi', 'body_type': 'SUV', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q5) : {'make': 'Audi', 'body_type': 'SUV', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q5 PHEV) : {'make': 'Audi', 'body_type': 'SUV', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi Q8) : {'make': 'Audi', 'body_type': 'SUV', 'seats': 5}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Audi R8) : {'make': 'Audi', 'body_type': 'Coupe', 'seats': 2}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Mazda 5) : {'make': 'Mazda', 'body_type': 'Minivan', 'seats': 6}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Mazda RX-8) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Mazda CX-7) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Mazda CX-50) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Dejanski podatki(Mazda MX-5) : {}
+Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
+
+Nasledji test:
+Dejanski podatki(Audi SQ7) : {'engine_type': 'hybrid', 'body_type': 'SUV', 'seats': 7, 'fuel_tank_capacity': 85}
 Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
 
-Dejanski podatki: {'engine_type': 'gas', 'body_type': 'Coupe', 'seats': 2, 'fuel_tank_capacity': 83}
+Dejanski podatki(BMW X7) : {'engine_type': 'gas', 'body_type': 'SUV', 'seats': 7, 'fuel_tank_capacity': 83}
 Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
 
+Dejanski podatki(Buick Enclave) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Cadillac Escalade) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Cadillac Escalade ESV) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Cadillac XT6) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Chevrolet Suburban) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Chevrolet Tahoe) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Chevrolet Traverse) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Dodge Durango) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Dodge Journey) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Ford Explorer) : {'engine_type': 'gas', 'body_type': 'SUV', 'seats': 7, 'fuel_tank_capacity': 68}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Honda Pilot) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Hyundai Palisade) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Hyundai Santa Fe) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Hyundai Santa Fe XL) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(INFINITI QX60) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(INFINITI QX80) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Kia Sorento) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Chevrolet Silverado) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Audi Q5) : {'engine_type': 'gas', 'body_type': 'SUV', 'seats': 5, 'fuel_tank_capacity': 70}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Infiniti QX70) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Ford SuperDuty) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki(Infiniti Q70) : {}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Nasledji test:

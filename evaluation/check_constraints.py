@@ -57,9 +57,11 @@ def main():
 
 
                 car_dict_predicted = get_car_data(predicted_car.split() , all_con)
-                f_constraint.write("Dejanski podatki: " + str(car_dict_predicted) + "\n")
+                f_constraint.write("Dejanski podatki(" + str(predicted_car) + ") : " + str(car_dict_predicted) + "\n")
                 f_constraint.write("Zahteve: " + str(constraints) + "\n")
                 f_constraint.write("\n")
+
+        f_constraint.write("Nasledji test:" + "\n")
 
 
     # car_dict = get_car_data(["Ford", "Edge"], ["seats", "cargo_capacity", "model"])

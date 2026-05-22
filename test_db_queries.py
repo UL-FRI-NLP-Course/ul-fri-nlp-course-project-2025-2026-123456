@@ -113,7 +113,7 @@ def main():
         # 4. Sample query by make
         print_section("4. SAMPLE QUERY")
 
-        make = "Ford"
+        make = "Mazda"
 
         cars = session.query(CarApiCar).filter(
             CarApiCar.make.ilike(make)
@@ -141,5 +141,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # car_dict = get_car_data(["Ford", "Edge"], ["seats", "cargo_capacity", "model"])
+    # car_dict = get_car_data(["Mazda", "RX-8"], ["seats", "make", "body_type"])
     # print(car_dict)
