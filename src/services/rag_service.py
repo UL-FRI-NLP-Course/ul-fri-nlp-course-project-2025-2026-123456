@@ -82,28 +82,20 @@ def handle_query(query: str, state: ConversationState):
     
     # create a conversation between user and LLM
     # that will get as many info for DB cars as possible
-    #status, parsed, merge_parsed, db_cars_list, llm_response = make_conversation(query, state)
     state = make_conversation(query, state)
 
     # If conversation is not finished → return early
     if state.status == "NOT READY":
         return state, []
 
-    #print(f"FINAL STATE")
-    #state.print_info()
-
-    print("BEFORE RETRIEVE CANDIDATES")
 
     # Step 3: Retrieve FAISS context based on parsed query terms
     candidates, context = retrieve_candidates(state.query_parsed, state.queries, k=10)
 
-    print("BEFORE FAISS SCORES")
 
     # Step 4: Build a mapping of FAISS candidate sources to cars
     # and merge DB results with FAISS scores
     faiss_scores = {c.get("source", ""): c.get("score", 0.0) for c in candidates}
-
-    print("BEFORE FOR LOOP")
 
 
     # Combine DB cars with FAISS scores
@@ -117,7 +109,6 @@ def handle_query(query: str, state: ConversationState):
     if not state.db_cars_list:
         state.db_cars_list = get_all_carapi_cars(limit=20)
 
-    print("BEFORE RANK CARS")
 
     # Step 5: Rank combined results
     ranked = rank_cars(state.db_cars_list, state.query_parsed)
