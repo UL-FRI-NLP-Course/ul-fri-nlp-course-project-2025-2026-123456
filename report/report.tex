@@ -122,7 +122,7 @@ In the context of vehicle recommendation, Beddouda et al. \cite{beddoudavehicle}
 
 For general CRS, several multi-turn dialogue systems have been proposed, especially in the travel domain. Liao et al. \cite{liao2019deepconversationalrecommendertravel} proposed a deep recommender system using seq2seq with a neural latent topic component. Baizal et al. \cite{baizal2021tourism} introduced an ontology-based system, and Carrillo et al. \cite{carrillo2023smarttur+} introduced a system that uses Chatbot to collect user preferences and generates similarity-based recommendations using SBERT embeddings.
 
-In addition to the travel domain, CRS have been implemented in several other domains. Sun et al. \cite{sun2018conversational} developed a reinforcement learning based CRS for restaurant recommendation using Yelp review data. Zhu et al. \cite{zhu2025collaborative} proposed a movie recommendation CRS using retrieval-augmented generation (RAG) approach in combination with a large language model (LLM).
+In addition to the travel domain, CRS have been implemented in several other domains. Sun et al. \cite{sun2018conversational} developed a reinforcement learning based CRS for restaurant recommendation using Yelp review data. Zhu et al. \cite{zhu2025collaborative} proposed a movie recommendation CRS using retrieval-augmented generation (RAG) approach in combination with a large language model.
 
 
 %------------------------------------------------
@@ -201,10 +201,8 @@ attributes that could be in interest to the user.
 
 Then the system employs a dual data strategy using data-bases described
 in the previous section.
-First, we use fetch relevant cars from the database using constraint-based filtering,
-which produces the candidate set.
-The user's query, along with the system's conversation history, is also
-embedded and used for semantic search in the FAISS vector database. Which includes embedded chunks of the vehicle brochures. This allows the system to retrieve cars that are semantically similar to the user's preferences, even if they do not exactly match the structured constraints. While we can extract information such as number of seats, or fuel type from the structured database, other information such as a car's feel, design or equipment is not easily captured in structured form, but can be retrieved from the brochures using the semantic search.
+First, we fetch relevant cars from the database using constraint-based filtering,
+which yields the first candidate set. Next we embed the user's query, along with the system's conversation history, and use it for semantic search in the FAISS vector database. Which contains embedded chunks from the vehicle brochures. This allows the system to retrieve cars that are semantically similar to the user's preferences, even if they do not exactly match the structured constraints. While we can extract information such as number of seats, or fuel type from the structured database, other information such as a car's feel, design or equipment is not easily captured in structured form, but can be retrieved from the brochures using the semantic search.
 
 The system then combines both retrieved sets of car candidates and filters them again to ensure that candidates from the FAISS search also meet the user's constraints. The contex of the retrieved chunks is then correctly formatted and provided to the LLM as part of the final recommendation prompt. So the LLM can summarize the retrieved information and generate a final recommendation response. The LLM also comments on the key differences between the suggested cars, which can help users make an informed decision. 
 
@@ -223,62 +221,40 @@ The system then combines both retrieved sets of car candidates and filters them 
 
 
 
-\section*{Evaluation of a model}
+\subsubsection*{Evaluation methods}
 
-Evaluation ideas:
+\textbf{TODO: add LLM's names} 
 
-\noindent
-\underline{Test if RAG is working well}
+Evaluating language models is challenging because their outputs are not 
+fully deterministic, especially when they are in conversation mode. We 
+designed three different tests to evaluate the system and the models.
 
-\vspace{5pt}
-\noindent
-Build a small controlled dataset (10 very different cars), where only one is 
-meeting the requirements. Ask the system to recommend a car and check if 
-it picks only the valid one.
+First, we evaluate whether the system performs better than a baseline. 
+We manually created a set of user queries and manually parsed them into 
+constraints (similar to Table \ref{tab:parsed query example}). 
+We then ran our system in non-conversational mode, 
+which directly returns a set of recommended cars. This result is compared 
+to the set of cars obtained from the structured database using the manually 
+verified constraints. From this comparison, we compute standard metrics 
+such as number of correctly retrieved cars, missed cars, precision, recall, 
+and F1 score. We also run the same evaluation for a baseline LLM without 
+any system support.
+
+The second evaluation tests the conversational setup. This evaluation 
+is not fully automated. We use the same queries as before, but simulate 
+multi-turn interaction by providing follow-up responses after each LLM question. 
+After the conversation ends, we store the final set of recommended cars and 
+compare it to the expected set obtained from the structured database using 
+the manually parsed query. We also join user's multiple queries into one and 
+send them to the non-conversational and baseline LLM. It is not fully 
+fair, but we also compare evaluation of our main pipeline with these two.
+
+The third evaluation tests whether the RAG component is working correctly.
+After each recommendation, we manually check whether the returned cars 
+satisfy the user's stated preferences.
 
 
-\vspace{7pt}
-\noindent
-\underline{Compare CRS to other LLMs}
 
-\vspace{5pt}
-\noindent
-Another idea is also creating a few prompts, for which we find a set of suitable cars. Then 
-we compare the output of our CRS system and one another LLM (preferably one that doesn't have 
-access to web). Then we evaluate if the LLMs found any car from the set.
-
-
-\vspace{7pt}
-\noindent
-\underline{Compare CRS to some website}
-
-\vspace{5pt}
-\noindent
-Compare recommendation to some website (Carwow, Autotrader according to chatgpt) and compare for 
-the same requirements the models output, though it is
-subjective method of evaluation (hard to tell which model is better, no hard truth on this topic)
-
-\vspace{7pt}
-\noindent
-\underline{Advanced method - baseline filter model}
-
-\vspace{5pt}
-\noindent
-Ideally (but too complicated to implement in such short time) would be to create a basic 
-filtering system, and conmpare the outputs with what the LLM is offering. Again the idea wouldn't 
-be to show it is better output objectively but either it shows more option, or wilder choices, etc. 
-Especially if the requirements are not precise or not coherent between themselves 
-(for instance big car + low consumption + high acceleration)
-
-\subsection*{Equations}
-
-\subsection*{Lists}
-
-\subsection*{Figures}
-
-\subsection*{Tables}
-
-\subsection*{Code examples}
 
 %------------------------------------------------
 
@@ -291,11 +267,6 @@ Especially if the requirements are not precise or not coherent between themselve
 Use the Discussion section to objectively evaluate your work, do not just put praise on everything you did, be critical and exposes flaws and weaknesses of your solution. You can also explain what you would do differently if you would be able to start again and what upgrades could be done on the project in the future.
 
 
-%------------------------------------------------
-
-\section*{Acknowledgments}
-
-Here you can thank other persons (advisors, colleagues ...) that contributed to the successful completion of your project.
 
 
 %----------------------------------------------------------------------------------------
