@@ -187,7 +187,7 @@ def evaluate(raw_llm=False, with_ollama=False):
         }
     }
 
-    f_result.write(json.dumps(summary) + "\n")
+    # f_result.write(json.dumps(summary) + "\n")
 
     f_result.close()
 

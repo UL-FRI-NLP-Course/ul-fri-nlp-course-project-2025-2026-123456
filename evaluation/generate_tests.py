@@ -98,6 +98,7 @@ def generate_test():
         row = {
             "question": query,
             "expected_answer": all_cars,
+            "constraints": constraint,
             "expected_docs": []
         }
 

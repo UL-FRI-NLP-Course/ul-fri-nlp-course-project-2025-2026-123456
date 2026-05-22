@@ -56,6 +56,37 @@ def print_unique_column_values(label, values):
         print(f"  {value}")
 
 
+def get_car_data(car, data):
+    brand = car[0]
+    model = car[1]
+
+    # Initialize database
+    init_db()
+    session = get_session()
+
+    try:
+        cars = session.query(CarApiCar).filter(
+            CarApiCar.make.ilike(brand)
+        ).all()
+
+        car_dict = {}
+
+        for constraint in data:
+
+            # num_seats = car.seats
+            for car in cars:
+                # print(car.model)
+                if car.model == model:
+                    # print(getattr(car, constraint))
+                    car_dict[constraint] = getattr(car, constraint)
+                    break
+
+    finally:
+        session.close()
+
+    return car_dict
+
+
 def main():
     """Run all test queries."""
     print("\n" + "="*60)
@@ -108,7 +139,7 @@ def main():
         session.close()
 
 
-
-
 if __name__ == "__main__":
     main()
+    # car_dict = get_car_data(["Ford", "Edge"], ["seats", "cargo_capacity", "model"])
+    # print(car_dict)

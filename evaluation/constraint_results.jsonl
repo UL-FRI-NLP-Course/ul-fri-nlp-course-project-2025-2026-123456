@@ -1,0 +1,6 @@
+Dejanski podatki: {'engine_type': 'gas', 'body_type': 'SUV', 'seats': 5, 'fuel_tank_capacity': 48}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
+Dejanski podatki: {'engine_type': 'gas', 'body_type': 'Coupe', 'seats': 2, 'fuel_tank_capacity': 83}
+Zahteve: [{'name': 'engine_type', 'value': 'diesel', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 7, 'constraint': 'min'}, {'name': 'fuel_tank_capacity', 'value': 50, 'constraint': 'min'}]
+
