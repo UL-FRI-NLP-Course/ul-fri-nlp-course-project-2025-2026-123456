@@ -3,3 +3,6 @@
 {"question":"Which cars are mentioned in Audi TT 2019 pdf?","expected_answer":["Audi TT Coupe", "Audi TT Roadsters", "Audi TTS"],"expected_docs":[]}
 {"question":"Where should I eat dinner?","expected_answer":[],"expected_docs":[]}
 {"question":"Name all unique models for BMW cars","expected_answer":["2 Series", "2 Series Gran Coupe", "3 Series", "3 Series Gran Turismo", "4 Series", "4 Series Gran Coupe", "5 Series", "5 Series Gran Turismo", "6 Series", "6 Series Gran Coupe"],"expected_docs":[]}
+{"question":"What car with 4 seats would you recommend?","expected_answer":[],"expected_docs":[]}
+{"question":"What is the best electric car with at least 6 seats?","expected_answer":["2 Series", "2 Series Gran Coupe", "3 Series", "3 Series Gran Turismo", "4 Series", "4 Series Gran Coupe", "5 Series", "5 Series Gran Turismo", "6 Series", "6 Series Gran Coupe"],"expected_docs":[]}
+{"question":"Which car should I buy with 2 seats and a manual transmission?","expected_answer":["2 Series", "2 Series Gran Coupe", "3 Series", "3 Series Gran Turismo", "4 Series", "4 Series Gran Coupe", "5 Series", "5 Series Gran Turismo", "6 Series", "6 Series Gran Coupe"],"expected_docs":[]}
