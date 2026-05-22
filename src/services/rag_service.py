@@ -140,7 +140,6 @@ def handle_query(query: str, state: ConversationState):
     
     # create a conversation between user and LLM
     # that will get as many info for DB cars as possible
-    #status, parsed, merge_parsed, db_cars_list, llm_response = make_conversation(query, state)
     state = make_conversation(query, state)
 
     state.print_info()
@@ -149,10 +148,6 @@ def handle_query(query: str, state: ConversationState):
     if state.status == "NOT READY":
         return state, []
 
-    #print(f"FINAL STATE")
-    #state.print_info()
-
-    print("BEFORE RETRIEVE CANDIDATES")
 
     # Step 3: Retrieve FAISS context based on parsed query terms
 

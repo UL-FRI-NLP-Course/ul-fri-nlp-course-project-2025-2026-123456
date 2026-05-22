@@ -39,6 +39,7 @@ class ConversationState:
         self.max_num_of_convos = 5              # max number of convos between llm and user
         self.empty_constraints = []             # when user specified some important things but not with values
         self.last_prompt_was_question = False   # if the last prompt was question, we should do additional prompt that joins q+a into one query
+        self.single_turn = False                # True if wanted without conversation
 
     def print_info(self):
         
@@ -191,9 +192,6 @@ def merge_parsed(old: dict, new: dict) -> dict:
     # Create lookup table from old entries
     merged = {item["name"]: item.copy() for item in old}
 
-    # Update or insert new entries
-    merged = {item["name"]: item.copy() for item in old}
-
     for item in new:
         name = item["name"]
 
@@ -242,13 +240,20 @@ def do_we_finish(round, parsed, alpha=0.40):
 
 def make_conversation(query: str, state: ConversationState):
 
+    """
+    Function that creates conversation with user (when state.single_turn == False).
+
+    Parses query
+    |
+    Creates a few-shot conversation with user:
+    asks for 'None's in query / asks for more preferences / asks to relax constraints
+    | 
+    Returns final list of cars (from SQL table)
+    """
+
 
     state.conversation_round += 1
     state.queries.append(query)
-
-    #print(f"round number {state.conversation_round}")
-    #print(f"current state:")
-    #print(state.print_info())
 
 
     # first check whether previous llm response was question -> we need to join the queries
@@ -261,40 +266,16 @@ def make_conversation(query: str, state: ConversationState):
         state.queries[-1] = new_query
         state.last_prompt_was_question = False
 
-        #print(f"new query is now: {new_query}")
 
-
-    """
-
-    if state.merge_parsed: 
-        # get a new parsed and merge it with previous one 
-        parsed_new = parse_query(state.queries[-1], state.conversation_round)
-        
-        # now here merge parsed and parsed new
-        parsed = merge_parsed(state.query_parsed, parsed_new)
-        
-        #print(f"new parsed: {parsed_new}\n")
-        #print(f"merged with previous one: {parsed}")
-
-    else: 
-        # get a new parsed 
-        parsed = parse_query(query, state.conversation_round)
-    """
-    # ^ zdej je brisaanje constraintov hopefully zrihtano s temu merge_parsed 
+    # merge preferences
     if not state.merge_parsed:
         # ce je to prvi krog pol sam sparsamo
         parsed = parse_query(query, state.conversation_round)
         state.merge_parsed = True   # in zdej tega ne spreminjam vec 
-
     else: 
+        # otherwise we need to merge all preferences
         parsed_new = parse_query(state.queries[-1], state.conversation_round)
         parsed = merge_parsed(state.query_parsed, parsed_new)
-
-
-    #queries_joined = [f"{q} " for q in state.queries]
-    #parsed["query"] = queries_joined
-    #print(f"final parsed:\n{parsed}")
-
 
     state.query_parsed = parsed
 
@@ -333,18 +314,21 @@ def make_conversation(query: str, state: ConversationState):
 
         # set default constraint 
         if val is not None and con is None:
-            state.query_parsed[item][con] = "equal"
+            item["constraint"] = "equal"
 
         if val is None:
             empty_important_constraints.append(item.get("name"))
 
-    #print(f"number of empty constraints: {len(empty_important_constraints)}")
-    #print(f"list of empty constraints: {empty_important_constraints}")
 
     # reset the constraints
-    # also could keep a track on those that LLM already asked about 
+    # (also could keep a track on those that LLM already asked about)
     state.empty_constraints = empty_important_constraints
 
+    # if it's a single turn, then we leave after first parsing
+    if state.single_turn:
+        print("SINGLE TURN CONVO - leaving make conversation")
+        state.status = "READY"
+        return state
 
 
     # check if this was the last convo of LLM and user and then return if yes
@@ -361,16 +345,11 @@ def make_conversation(query: str, state: ConversationState):
     #print("\n[Processing Convo...]")
 
 
-    # ROUND 1 OF QUESTIONING
-    # LLM should ask about empty constraiants 
-    # or if its too many rounds, just finish
+    # ROUND 1 OF QUESTIONING: LLM should ask about empty constraiants 
     if len(state.empty_constraints) > 0:
 
-        # convos still available
         print(f"LLM should ask user about the empty preferences: {state.empty_constraints}")
         llm_response = generate_missing_constraints_response(state.empty_constraints)
-        #print("RESPONSE OF LLM")
-        #print(llm_response)
 
         state.llm_responses.append(llm_response)
         state.last_prompt_was_question = True # so that we parse llm response plus answer
@@ -380,20 +359,17 @@ def make_conversation(query: str, state: ConversationState):
         return state
 
 
+    # ROUND 2 OF QUESTIONING: LLM should ask to add preferences or to relax them
 
 
+    # get a nicer form for LLM prompt 
     constraints_text = parsed_to_text(state.query_parsed)
-    #print(f"constraint text:\n{constraints_text}")
-
-
-    
 
 
     # case 1: no matching cars
     if len(state.db_cars) == 0:
         
         # try to get better response of user (less constraints)
-
         print("not enough cars - LLM should tell user to relax preferences")
 
         llm_response = generate_no_car_response(constraints_text)
@@ -403,20 +379,18 @@ def make_conversation(query: str, state: ConversationState):
 
         return state
 
-
     # case 2: too many matching cars
     if len(state.db_cars) > TOO_BROAD_THRESHOLD:
 
         # try to get better response of user (more constraints)
-
         print("too many cars - LLM should tell user to provide some preferences, and then list from which they can choose")
 
         # get missing preferences
         missing_prefs_list = get_missing_preferences(state.query_parsed, IMPORTANT_CONSTRAINTS)
 
         if missing_prefs_list:
-            # if its not empty
 
+            # if its not empty
             missing_prefs = ", ".join(missing_prefs_list)
             llm_response = generate_many_cars_response(constraints_text, missing_prefs)
 

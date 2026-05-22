@@ -155,9 +155,23 @@ python scripts/ingest_carapi_stats.py
 ```
 
 ### Benchmark
-To benchmark the RAG system run the pipeline with `--raw-llm` argument which prompts the same LLM with the same persona and instructions, without the RAG functinality.
+
+To benchmark the system, we support multiple inference modes that allow comparison between the same LLM under different levels of retrieval and interaction.
+
+
+#### 1. Raw LLM (no RAG, no database access)
+
+This mode runs the same LLM with the same persona and instructions as the main pipeline, but without retrieval augmentation or database-based recommendations.
 
 ```bash
 python src/main.py --raw-llm
 ```
 
+#### 2. Single-turn LLM
+
+This mode runs the same system as the main pipeline, but as a non-conversational
+setup. It does not ask any additional question, but directly return car recommendations.
+
+```bash
+python src/main.py --single-turn
+```

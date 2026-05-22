@@ -25,6 +25,14 @@
 \usepackage{comment}
 \usepackage{adjustbox}
 
+% array packages
+\usepackage{array}
+\usepackage{tabularx} 
+\usepackage{changepage}
+\usepackage{placeins}
+\usepackage{makecell}
+\usepackage{multirow} 
+\usepackage{float}
 
 \graphicspath{{fig/}}
 
@@ -52,7 +60,7 @@
 \affiliation{\textit{Advisors: Aleš Žagar}}
 
 % Keywords
-\Keywords{Keyword1, Keyword2, Keyword3 ...}
+\Keywords{Conversational Recommender System, RAG, FAISS, Car recommendation, LLM}
 \newcommand{\keywordname}{Keywords}
 
 
@@ -61,7 +69,18 @@
 %----------------------------------------------------------------------------------------
 
 \Abstract{
-The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here. The abstract goes here.
+In this report, we design a Conversational Recommender System for vehicle selection. 
+The system helps users express their preferences in natural language and translates them 
+structured technical terms. We propose a dual data strategy that combines 
+two data retrieval approaches. The first is constraint-based filtering over a structured 
+SQL-like database of vehicle attributes. The second is FAISS-based similarity search 
+over vector embeddings generated from vehicle brochures.
+We evaluate the proposed system against multiple variants. LLM such as Qwen and LLama without any 
+data retrieval represents the baseline. More advanced comparison represent 
+a non-conversational version of the proposed recommender system.
+In all cases the proposed recommender system outperformed the others.
+
+\textbf{TODO! Dodaj dejanske rezultate al neki}
 }
 
 %----------------------------------------------------------------------------------------
@@ -88,7 +107,13 @@ Most existing systems that assist users in selecting vehicles are based on prede
 
 As an improvement to such systems, Conversational Recommender Systems (CRS) have been introduced. A CRS is an interactive system that allows users to express their preferences through dialogue, while the system can ask follow-up questions to refine these preferences and provide the best recommendation(s). 
 
-In this paper, we propose a CRS for vehicle selection using retrieval-augmented generation (RAG), with which relevant vehicle data is retrieved and provided to a large language model (LLM) that generates personalized recommendations. The final product is a system that simplifies making a decision for non-expert users, and also improves customer experience in vehicle selling companies.
+In this paper, we propose a hybrid CRS for vehicle selection using that combines large 
+language models (LLMs), structured constraint extraction, and retrieval-augmented generation (RAG). 
+The system engages the user in a conversation with an LLM that helps them express and refine their vehicle preferences.
+The final product is a system that simplifies making a 
+decision for non-expert users, and also improves customer experience in vehicle selling companies.
+
+
 
 \section*{Related work}
 Several studies have explored recommender systems, however the vehicle domain remains limited. We categorized existing work into recommendation systems for vehicles and conversational recommender systems for various products.
@@ -108,70 +133,113 @@ The proposed system is designed as a Conversational Recommender System (CRS)
 that integrates large language models (LLMs), 
 structured data processing, and retrieval-augmented generation (RAG) to provide personalized 
 vehicle recommendations through natural 
-language interaction. The whole process is described below as well as 
+language interaction. The overall pipeline is described below as well as shown
 on the figure \ref{CRS diagram}.
 
+
+\subsubsection*{Data Preprocessing} \label{data processing}
+
+The first dataset was extracted from the CarAPI website \cite{carapi}. 
+It provides vehicle data in JSON format, such as price, fuel consumption, 
+engine specifications... Data was then processed and stored into 
+structured SQLite database (on Figure \ref{CRS diagram} marked as Structured database). 
+
+The second dataset consists of vehicle brochures in PDF format
+extracted from the Auto-Brochures website \cite{autobrochuers}. 
+The dataset includes 
+multiple car brands available on the US market, of which 26 were selected 
+for this work. We used a Qwen embedding model to generate vector 
+represenations of the dataset content. These embeddings were then 
+indexed using FAISS (Facebook AI similarity search) \cite{faiss}
+to enable efficient similarity search (Dataset
+is marked on Figure \ref{CRS diagram} as FAISS Vector Database).
+
+
+\subsubsection*{Conversational Recommender System - CRS}
+
+The system begins with user describing in natural language their preferences and requirements 
+they look for in a new car. That input is then processed by the LLM (on figure 
+\ref{CRS diagram} marked as LLM Parser). The LLM extracts structured 
+representations of user's preferences in a JSON-like format. An example
+of a parsed query is shown in a Table \ref{tab:parsed query example}.
+
+\begin{table}[H]
+\resizebox{1.0 \linewidth}{!}
+{\begin{tabular}{| c c c |}
+
+\hline
+Name & Value & \makecell{Constraint \\ (min, max, equal...)}  \\ 
+\hline
+body\_type  & SUV & equal  \\
+\hline
+engine\_type  & electric & equal  \\
+\hline
+combined\_l\_per\_100km  & None & None  \\
+\hline
+
+\end{tabular}}
+\caption{
+    Example of parsed text for the following user's query: 
+    "I'm looking for a spacious SUV with low consumption, preferably electric."
+}
+\label{tab:parsed query example}
+\end{table}
+\FloatBarrier
+
+However, a single 
+user query is often insufficient to produce high-quality recommendations.
+As seen in Table \ref{tab:parsed query example}, the LLM is able to identify
+that a preference is important to the user, but cannot determine the exact 
+value of the corresponding constraint.
+For example, a preference such as low fuel 
+consumption may be correctly extracted but with missing a precise numerical value,
+which then results as an incomplete structured information.
+
+\vspace{3pt}
 \noindent
-\textbf{Data Preprocessing}
+Another problem with a single query is possibly a very large choice of cars 
+for give user's preferences. If user wasn't able to express all their preferences 
+or forgot to list them, that set can become really big.
 
-\vspace{5pt}
+\vspace{3pt}
 \noindent
-The first data was extracted from the website CarAPI \cite{carapi}. 
-It returns data in JSON format, which was then processed into 
-SQLite table (on \ref{CRS diagram} marked as Structured database). 
+To address these issues, we improved the system with creating a conversational LLM.
+(marked on Figure \ref{CRS diagram} with the same name). This model 
+interacts with the user to complete missing constraints and suggest additional 
+attributes that could be in interest to the user.
 
-Process:
-We sent the parsed query to that table which returned a list of multiple 
-car candidates. constraint-based filtering.
 
-\vspace{5pt}
+
+Then the system employs a dual data strategy using databases described
+in the previous section.
+First, we use parsed query in structured database using constraint-based filtering,
+which initially reduces the candidate set.
+The parsed query is then 
+embedded and used for semantic search in the FAISS vector database. This 
+search returns columns relevant to user's query.
 \noindent
-Another data in pdf format was extracted from the website Auto-Brochures 
-\cite{autobrochuers}. The website consist of several different brands 
-of cars, found on the US market. We focused on 26 of them. With Qwen 
-embedding model we created embedded vectors from that dataset. (on 
-\ref{CRS diagram} marked as FAISS Vector database).
-Mention FAISS
+\textbf{TODO: dokončej to ko bo retrival.py done}
 
-Process:
-we embed the parsed query and send it to that dataset
-
-\noindent
-\textbf{CRS System}
-
-kako deluje etc 
-
-\noindent
-\textbf{LLM prompts etc}
-
-how we created prompts:
-ur assistant 
-task
-rules (no json, just natrual language)
-
-how memory works (it remembers all queries and last LLM prompt)
-
-
-The method begins with a natural language interface through which 
-users describe their preferences and requirements. 
-These inputs are processed by an LLM to extract structured representations of user 
-intent, such as budget constraints, vehicle type, and qualitative preferences.
-
-The system then employs a dual data strategy. A structured database containing quantitative vehicle attributes (e.g., price, fuel consumption, engine specifications) 
-is used to perform constraint-based filtering and reduce the candidate set. In parallel, a vector database built from unstructured sources from brochures and 
-catalogs enables semantic retrieval of relevant contextual information. We will use Auto Catalog Archive \cite{autocatalogarchive} as our initial dataset. 
-This website contains more than 55,000 car brochures that include many different car models. Each brochure provides technical specifications 
-(like power, weight, range…), list of features (like type of wheel, roof rail, safety equipment…), and other promotional information. 
-
+After that, the system combines both retrieved sets of car candidates.
+Then cars from this merged set are ranked according to how well 
+they match the user's preferences and requirements. The highest ranked 
+cars are sent to the LLM, which generates the final recommendation response
+and comments on the key differences between the suggested cars. 
 
 
 \begin{figure}[!htbp]
     \centering
-    \includegraphics[width=\columnwidth]{nlp_diagram.png}
-    \caption{CRS System in a Diagram}
+    \includegraphics[width=\columnwidth]{fig/crs_system.png} 
+    \caption{
+        CRS Architecture. Blue arrows represent conversation interaction loop between the 
+        user and the LLM, green components represent databases that the system uses.
+    }
     \label{CRS diagram}
 \end{figure}
 \FloatBarrier
+
+
+
 
 \section*{Evaluation of a model}
 

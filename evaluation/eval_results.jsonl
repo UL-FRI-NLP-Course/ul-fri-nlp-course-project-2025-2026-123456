@@ -1,0 +1,2 @@
+{"question": "What are some Mazda cars released in 2023?", "expected": ["Mazda CX-5", "Mazda CX-50"], "predicted": [], "top3_correct": false, "intersection": [], "correct_count": 0, "extra_count": 0, "missed_count": 2, "precision": 0, "recall": 0.0, "f1": 0}
+{"summary": {"samples": 1, "top1_accuracy": 0.0, "top3_accuracy": 0.0}}
