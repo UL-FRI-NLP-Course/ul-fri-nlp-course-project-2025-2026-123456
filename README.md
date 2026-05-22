@@ -9,33 +9,54 @@ python src/main.py
 
 Then type queries like:
 ```
-You: I am looking for a sporty coupe that wont break the bank
+You: I am looking for an affordable family SUV with 7 seats.
 ```
 
-And the system responds:
+The system might ask you for aditional information:
 ```
 Response:
- Let me know if you need any clarification or have additional questions.
+To help narrow down your options, could you please specify if you prefer a particular make or model? Additionally, do you have any requirements regarding the fuel type or the seating arrangement like second-row captain's chairs versus a bench seat?
+```
 
-Summary: For a sporty coupe that won't break the bank, the Ford Mustang, Toyota 86, and Mazda MX-5 are top recommendations. The Mustang offers a powerful engine and modern styling, while the Toyota 86 provides a fun-to-drive experience with excellent handling. The Mazda MX-5 stands out for its lightweight design, aggressive performance, and iconic status among enthusiasts. All three vehicles deliver on the promise of a sporty coupe without a hefty price tag.
+```
+You: I do not have a brand or model preference, but I would like to have a diesel engine.
+```
 
-Tradeoffs include different levels of luxury features, fuel efficiency, and overall size. The Mustang may be slightly larger but offers more interior space and luxury features compared to the compact Toyota 86 and the smaller Mazda MX-5. The Mazda MX-5 sacrifices some comfort and cargo space for its lightweight, agile nature, making it ideal for enthusiasts seeking a true sports car
+Before generating the final response.
+
+```
+Given your preference for a diesel engine and need for a 7-seater SUV, I recommend focusing on the Audi Q7, Chevrolet Suburban, and Chevrolet Tahoe. These models balance affordability and实用性建议如下：
+
+1. **Audi Q7**: Offers robust performance and luxurious interiors suitable for a family. However, note that finding a diesel variant might be limited due to market availability, typically preferring gasoline engines. 
+
+2. **Chevrolet Suburban**: Provides ample space and reliable diesel option, ideal for large families needing extra room. It's known for durability and comfort, making long journeys easier.
+
+3. **Chevrolet Tahoe**: Another strong contender offering a comfortable ride and sufficient seating capacity. Like the Suburban, it has a diesel version which ensures good fuel efficiency and lower running costs over time.
+
+While the Mercedes-Benz models offer premium features, they tend to be more expensive and less common in diesel versions. The Land Rover Discovery is also a great choice, though it primarily uses petrol engines and is priced higher than the others mentioned here.
+
+For your specific needs, the **Suburban** and **Tahoe** stand out due to their reliability, spaciousness, and availability of diesel engines, balancing practicality and cost-effectiveness well.
 
 Top Recommendations:
-  1. Ford Mustang
+  1. Audi Q7
 
-  2. Toyota 86
+  2. Land Rover Discovery
 
-  3. Mazda MX-5
+  3. Mercedes-Benz GL-Class
+
+  4. Mercedes-Benz GLS-Class
+
+  5. Chevrolet Suburban
+
+  6. Chevrolet Tahoe
 ```
 
 The system will:
 1. Embed your query
 2. Retrieve top-K chunks from FAISS
-3. Parse the query for keywords and specifications
+3. Parse the query with LLM to extract constraints
 4. Fetch relevant vehicles from the database
-3. Rank candidates
-4. Generate a recommendation with LLM
+5. Generate a recommendation with LLM
 
 ### Architecture
 
@@ -55,34 +76,44 @@ The system has two information sources:
 
 ```
 src/
-├── main.py                   # RAG pipeline entry point
-├── config.py                 # Configuration + paths
+├── main.py                            # RAG pipeline entry point
+├── config.py                          # Configuration + paths
 ├── ingestion/
-│   ├── chunker.py            # Text chunking
-│   ├── embedder.py           # SentenceTransformers embeddings
-│   └── faiss_store.py        # FAISS utilities
+│   ├── chunker.py                     # Text chunking
+│   ├── embedder.py                    # SentenceTransformers embeddings
+│   └── faiss_store.py                 # FAISS utilities
 ├── services/
-│   ├── rag_service.py        # RAG orchestration
-│   ├── retrival.py           # FAISS retrieval
-│   ├── llm.py                # Llama-2-7b generation
-│   ├── ranking.py            # Candidate ranking
-│   └── parser.py             # Query parsing
+│   ├── rag_service.py                 # RAG orchestration
+│   ├── retrival.py                    # FAISS retrieval
+│   ├── llm.py                         # LLM generation
+│   ├── conversation.py                # Conversation logic
+│   └── parser.py                      # Query parsing
 └── db/
-    ├── database.py           # Structured DB connection
-    ├── carapi_schema.py      # Data schemas
-    └── carapi_queries.py     # Data querying
+    ├── database.py                    # Structured DB connection
+    ├── carapi_schema.py               # Data schema and metadata
+    ├── carapi_queries.py              # Data querying
+    └── carapi_column_emb.py           # Embedding utilities
 
 
 scripts/
-├── get_carapi_stats.py       # Download car stats from CarAPI
-├── get_pdf_data.py           # Download pdf brochures
-├── ingest_carapi_stats.py    # One-time carapi stats ingestion
-└── ingest_pdfs.py            # One-time pdf ingestion
+├── get_carapi_stats.py                # Download car stats from CarAPI
+├── get_pdf_data.py                    # Download pdf brochures
+├── ingest_carapi_stats.py             # One-time carapi stats ingestion
+└── ingest_pdfs.py                     # One-time pdf ingestion
 
 data/
-├── carapi/                   # CarAPI stats
-├── pdfs/                     # Pdf brochures
-└── vector_store/             # FAISS index + metadata
+├── carapi/                            # CarAPI stats
+├── pdfs/                              # Pdf brochures
+└── vector_store/                      # FAISS index + metadata
+
+benchmark/
+├── benchmark_embedder.py              # Benchmark for embedding models
+├── queries_with_labeled_scores.json   # Labeled data for benchmark
+└── show_column_embeddings.py          # Utils for testing embedding models
+
+evaluation/
+├── evaluate_llm.py                    # Evaluation of the CRS
+└── generate_tests.pt                  # Generate tests for the evaluation
 ```
 
 ### Installation
@@ -98,13 +129,7 @@ pip install -r requirements.txt
 
 ### Configuration
 
-Edit `.env` to override defaults:
-```
-SENTENCE_TRANSFORMER_MODEL=all-MiniLM-L6-v2
-HF_LLM_MODEL=meta-llama/Llama-2-7b-chat-hf
-USE_8BIT_QUANTIZATION=true
-DATABASE_URL=... 
-```
+Edit `.env` to override defaults defined in `src/config.py`.
 
 ### Setup Steps (one-time)
 
@@ -148,7 +173,7 @@ Output:
 - Downloads raw json data to `data/carapi/`
 
 #### 4. Run Ingestion for structured DB
-This creates the `carapi.db` SQLite database. 
+This creates the `carapi.db` SQLite database and generates the embeddings for the attributes. 
 
 ```bash
 python scripts/ingest_carapi_stats.py
@@ -175,3 +200,24 @@ setup. It does not ask any additional question, but directly return car recommen
 ```bash
 python src/main.py --single-turn
 ```
+
+#### Attribute embedding benchmark
+
+Benchmark different embedding models on the task of embedding CarAPI attributes.
+
+```bash
+python benchmark/benchmark_embedder.py
+```
+
+### Evaluation 
+
+To evaluate the performance of CRS first generate tests.
+
+```bash
+python evaluation/generate_tests.py
+```
+
+Then run the benchmark. 
+
+```bash
+python evaluation/evaluate_llm.py
