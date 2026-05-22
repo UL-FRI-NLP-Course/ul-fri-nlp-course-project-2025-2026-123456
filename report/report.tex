@@ -158,10 +158,14 @@ is marked on Figure \ref{CRS diagram} as FAISS Vector Database).
 \subsubsection*{Conversational Recommender System - CRS}
 
 The system begins with user describing in natural language their preferences and requirements 
-they look for in a new car. That input is then processed by the LLM (on figure 
-\ref{CRS diagram} marked as LLM Parser). The LLM extracts structured 
-representations of user's preferences in a JSON-like format. An example
-of a parsed query is shown in a Table \ref{tab:parsed query example}.
+they look for in a new car. That input is then parsed by the LLM (on figure 
+\ref{CRS diagram} marked as LLM Parser). 
+
+Parsing is implemented by first extracting relevant attributes from the user's query using the embeddings of the description of the attributes. When we defined a schema for the structured database, we also crafted metadata for each attribute in a form of a short description. This description also includes synonyms, related terms, user intentions and example queries. Then we embed those descriptions using an embedding model, which was selected with benchmarking of different models, with a specialised instructions for the task. When the user query is received, we embed it using the same embedding model and then calculate similarity between the query embedding and the attribute description embeddings. The attributes with the highest similarity are selected as relevant to the user's query.
+
+For each relevant attribute, the LLM is then prompted to extract the corresponding value and constraint, which proved to be more effective than directly prompting the LLM to extract every attribute at once. 
+
+Table \ref{tab:parsed query example} shows an example of the extracted structured information from a user query. The LLM is able to identify that the user is looking for an SUV with electric engine, but it cannot determine the exact value of the fuel consumption constraint, which is then marked as None.
 
 \begin{table}[H]
 \resizebox{1.0 \linewidth}{!}
@@ -186,20 +190,7 @@ combined\_l\_per\_100km  & None & None  \\
 \end{table}
 \FloatBarrier
 
-However, a single 
-user query is often insufficient to produce high-quality recommendations.
-As seen in Table \ref{tab:parsed query example}, the LLM is able to identify
-that a preference is important to the user, but cannot determine the exact 
-value of the corresponding constraint.
-For example, a preference such as low fuel 
-consumption may be correctly extracted but with missing a precise numerical value,
-which then results as an incomplete structured information.
-
-\vspace{3pt}
-\noindent
-Another problem with a single query is possibly a very large choice of cars 
-for give user's preferences. If user wasn't able to express all their preferences 
-or forgot to list them, that set can become really big.
+That is why a single user query is usually not enough to generate a good recommendation. User also might not express all their preferences in a single query, leading to a very large choice of cars. 
 
 \vspace{3pt}
 \noindent
@@ -208,23 +199,14 @@ To address these issues, we improved the system with creating a conversational L
 interacts with the user to complete missing constraints and suggest additional 
 attributes that could be in interest to the user.
 
-
-
-Then the system employs a dual data strategy using databases described
+Then the system employs a dual data strategy using data-bases described
 in the previous section.
-First, we use parsed query in structured database using constraint-based filtering,
-which initially reduces the candidate set.
-The parsed query is then 
-embedded and used for semantic search in the FAISS vector database. This 
-search returns columns relevant to user's query.
-\noindent
-\textbf{TODO: dokončej to ko bo retrival.py done}
+First, we use fetch relevant cars from the database using constraint-based filtering,
+which produces the candidate set.
+The user's query, along with the system's conversation history, is also
+embedded and used for semantic search in the FAISS vector database. Which includes embedded chunks of the vehicle brochures. This allows the system to retrieve cars that are semantically similar to the user's preferences, even if they do not exactly match the structured constraints. While we can extract information such as number of seats, or fuel type from the structured database, other information such as a car's feel, design or equipment is not easily captured in structured form, but can be retrieved from the brochures using the semantic search.
 
-After that, the system combines both retrieved sets of car candidates.
-Then cars from this merged set are ranked according to how well 
-they match the user's preferences and requirements. The highest ranked 
-cars are sent to the LLM, which generates the final recommendation response
-and comments on the key differences between the suggested cars. 
+The system then combines both retrieved sets of car candidates and filters them again to ensure that candidates from the FAISS search also meet the user's constraints. The contex of the retrieved chunks is then correctly formatted and provided to the LLM as part of the final recommendation prompt. So the LLM can summarize the retrieved information and generate a final recommendation response. The LLM also comments on the key differences between the suggested cars, which can help users make an informed decision. 
 
 
 \begin{figure}[!htbp]

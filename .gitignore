@@ -153,3 +153,5 @@ benchmark/embeddings/
 
 # LLM models
 models/
+
+evaluation/eval_*
