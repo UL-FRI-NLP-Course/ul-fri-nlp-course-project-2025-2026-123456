@@ -39,6 +39,30 @@ def generate_prompt(query: str, parsed: dict, ranked: list, context: list):
 
     return prompt
 
+# POSSIBLE PROMPT ker un zgori si loh mal zmisluje 
+"""
+    You are a conversational car recommendation assistant. You are talking directly 
+    to the user, and their preferences matched with the following three cars:
+    
+    1. 'id': 9023, 'brand': 'Toyota', 'model': 'Yaris', 'year': 2020, 'trim': 'L', 'series': None, 'submodel': 'L', 'msrp': 15650.0, 'fuel_type': 'regular unleaded', 'body_type': 'Sedan', 'seats': 5, 'transmission': '6-speed manual', 'horsepower': 106, 'torque_nm': 140, 'fuel_consumption_l_per_100km': 6.92, 'width_cm': 169, 'length_cm': 435, 'height_cm': 149, 'weight_kg': 1082, 'trunk_volume': 382, 'has_awd': False
+    2. 'id': 9025, 'brand': 'Toyota', 'model': 'Yaris', 'year': 2020, 'trim': 'LE', 'series': None, 'submodel': 'LE', 'msrp': 16650.0, 'fuel_type': 'regular unleaded', 'body_type': 'Sedan', 'seats': 5, 'transmission': '6-speed manual', 'horsepower': 106, 'torque_nm': 140, 'fuel_consumption_l_per_100km': 6.92, 'width_cm': 169, 'length_cm': 435, 'height_cm': 149, 'weight_kg': 1089, 'trunk_volume': 382, 'has_awd': False
+    3. 'id': 9024, 'brand': 'Toyota', 'model': 'Yaris', 'year': 2020, 'trim': 'L', 'series': None, 'submodel': 'L', 'msrp': 16750.0, 'fuel_type': 'regular unleaded', 'body_type': 'Sedan', 'seats': 5, 'transmission': '6-speed automatic', 'horsepower': 106, 'torque_nm': 140, 'fuel_consumption_l_per_100km': 6.72, 'width_cm': 169, 'length_cm': 435, 'height_cm': 149, 'weight_kg': 1103, 'trunk_volume': 382, 'has_awd': False
+    
+    You need to list these three options, and then explain briefly what is the 
+    main difference between all three of them.
+
+    Do NOT write anything besides the options and their differences. 
+    You MUST respond in natural language only.
+    Do NOT output code, functions, JSON, or pseudocode.
+
+
+    You MUST respond in this format:
+    Option 1: ...
+    Option 2: ...
+    Option 3: ...
+    Difference: ...
+
+"""   
 
 def generate_raw_prompt(query: str):
     return (
@@ -64,7 +88,7 @@ def handle_query(query: str, state: ConversationState):
     #state.print_info()
 
     # Step 3: Retrieve FAISS context based on parsed query terms
-    candidates, context = retrieve_candidates(state.query_parsed, k=10)
+    candidates, context = retrieve_candidates(state.query_parsed, state.queries, k=10)
 
     # Step 4: Build a mapping of FAISS candidate sources to cars
     # and merge DB results with FAISS scores
