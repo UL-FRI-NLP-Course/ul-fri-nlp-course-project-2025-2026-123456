@@ -24,6 +24,9 @@ def get_model(model_name: str = HF_LLM_MODEL) -> tuple[AutoModelForCausalLM, Aut
 
     if _model is not None and model_name == _model_name:
         return _model, _tokenizer
+    model_name = HF_LLM_MODEL
+    print(HF_LLM_MODEL)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     _tokenizer = AutoTokenizer.from_pretrained(
         model_name,
@@ -181,3 +184,24 @@ def safe_json_parse(raw: str, column_name: str) -> Dict[str, Any]:
         "value": value,
         "constraint": constraint
     }
+    return output[0]["generated_text"]
+
+
+if __name__ == "__main__":
+
+    init_llm()
+
+    prompt = f"""
+        You are an assistant on the website that recommends cars. 
+        User just told you the preferences for their car, and they are as follows:
+        - size = big,
+        - type = family car,
+        - budget = 1000€,
+        - number of seats = 5.
+        However, when we searched in the database, there was no car found 
+        with these exact preferences. Figure out why (for example, too low budget),
+        and ask user if they would be okay with some other type of preference.  
+    """
+
+    response = generate_response(prompt)
+    print(response)

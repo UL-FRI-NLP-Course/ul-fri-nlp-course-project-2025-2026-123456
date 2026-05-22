@@ -21,6 +21,11 @@
 \documentclass[fleqn,moreauthors,10pt]{ds_report}
 \usepackage[english]{babel}
 
+\usepackage{placeins}
+\usepackage{comment}
+\usepackage{adjustbox}
+
+
 \graphicspath{{fig/}}
 
 
@@ -99,10 +104,58 @@ In addition to the travel domain, CRS have been implemented in several other dom
 
 \section*{Methods}
 
-The proposed system is designed as a Conversational Recommender System (CRS) that integrates large language models (LLMs), 
-structured data processing, and retrieval-augmented generation (RAG) to provide personalized vehicle recommendations through natural 
-language interaction. The method begins with a natural language interface through which users describe their preferences and requirements. 
-These inputs are processed by an LLM to extract structured representations of user intent, such as budget constraints, vehicle type, and qualitative preferences.
+The proposed system is designed as a Conversational Recommender System (CRS) 
+that integrates large language models (LLMs), 
+structured data processing, and retrieval-augmented generation (RAG) to provide personalized 
+vehicle recommendations through natural 
+language interaction. The whole process is described below as well as 
+on the figure \ref{CRS diagram}.
+
+\noindent
+\textbf{Data Preprocessing}
+
+\vspace{5pt}
+\noindent
+The first data was extracted from the website CarAPI \cite{carapi}. 
+It returns data in JSON format, which was then processed into 
+SQLite table (on \ref{CRS diagram} marked as Structured database). 
+
+Process:
+We sent the parsed query to that table which returned a list of multiple 
+car candidates. constraint-based filtering.
+
+\vspace{5pt}
+\noindent
+Another data in pdf format was extracted from the website Auto-Brochures 
+\cite{autobrochuers}. The website consist of several different brands 
+of cars, found on the US market. We focused on 26 of them. With Qwen 
+embedding model we created embedded vectors from that dataset. (on 
+\ref{CRS diagram} marked as FAISS Vector database).
+Mention FAISS
+
+Process:
+we embed the parsed query and send it to that dataset
+
+\noindent
+\textbf{CRS System}
+
+kako deluje etc 
+
+\noindent
+\textbf{LLM prompts etc}
+
+how we created prompts:
+ur assistant 
+task
+rules (no json, just natrual language)
+
+how memory works (it remembers all queries and last LLM prompt)
+
+
+The method begins with a natural language interface through which 
+users describe their preferences and requirements. 
+These inputs are processed by an LLM to extract structured representations of user 
+intent, such as budget constraints, vehicle type, and qualitative preferences.
 
 The system then employs a dual data strategy. A structured database containing quantitative vehicle attributes (e.g., price, fuel consumption, engine specifications) 
 is used to perform constraint-based filtering and reduce the candidate set. In parallel, a vector database built from unstructured sources from brochures and 
@@ -110,6 +163,15 @@ catalogs enables semantic retrieval of relevant contextual information. We will 
 This website contains more than 55,000 car brochures that include many different car models. Each brochure provides technical specifications 
 (like power, weight, range…), list of features (like type of wheel, roof rail, safety equipment…), and other promotional information. 
 
+
+
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=\columnwidth]{nlp_diagram.png}
+    \caption{CRS System in a Diagram}
+    \label{CRS diagram}
+\end{figure}
+\FloatBarrier
 
 \section*{Evaluation of a model}
 

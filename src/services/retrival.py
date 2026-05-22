@@ -23,9 +23,11 @@ def _load_index_and_metadata():
 	return _index, _metadata
 
 
-def retrieve_candidates(parsed_query, k=10):
+def retrieve_candidates(parsed_query, queries, k=10):
 	# Embed the parsed query as a richer text query
 	query_terms = []
+
+	"""
 	if isinstance(parsed_query, dict):
 		query_terms.extend(parsed_query.get("terms", []))
 		for key in ("fuel_types", "body_styles", "sizes", "use_cases"):
@@ -39,6 +41,30 @@ def retrieve_candidates(parsed_query, k=10):
 		transmission = parsed_query.get("transmission")
 		if transmission:
 			query_terms.append(transmission)
+	"""
+	# quick change sam da mi errorje neha metat
+	if isinstance(parsed_query, list):
+		for item in parsed_query:
+			name = item.get("name")
+			value = item.get("value")
+			constraint = item.get("constraint")
+
+			# skip empty fields
+			if value is None:
+				continue
+
+			# handle different field types
+			if name == "seats":
+				query_terms.append(f"{value} seats")
+
+			elif name == "budget":
+				query_terms.append(f"budget {constraint} {value}" if constraint else f"budget {value}")
+
+			elif name == "combined_l_per_100km":
+				query_terms.append(f"{constraint} {value} l/100km" if constraint else f"{value} l/100km")
+
+			else:
+				query_terms.append(str(value))
 
 	query_text = " ".join(query_terms).strip()
 	if not query_text:
@@ -46,7 +72,11 @@ def retrieve_candidates(parsed_query, k=10):
 
 	print(f"Query text: {query_text}\n")
 
-	query = parsed_query.get("query", "")
+	query = queries
+
+	# in case of multiple queries:
+	if isinstance(query, list):
+		query = " ".join(query)
 
 	query_emb = embed([query])[0]
 	query_emb = query_emb.astype("float32")
@@ -69,7 +99,7 @@ def retrieve_candidates(parsed_query, k=10):
 		chunk_text = meta.get("text", f"Chunk {meta['chunk_id']} from {meta['source']}")
 		context.append(f"[{vehicle_label}] {chunk_text}")
 
-	print(f"Candidates retrieved: {candidates}\n")
-	print(f"Context: {context}\n")
+	#print(f"Candidates retrieved: {candidates}\n")
+	#print(f"Context: {context}\n")
 
 	return candidates, context
