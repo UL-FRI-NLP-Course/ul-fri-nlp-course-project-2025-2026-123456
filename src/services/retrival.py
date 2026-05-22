@@ -1,11 +1,26 @@
 import numpy as np
-from src.ingestion.faiss_store import load_index, load_metadata, search_index
-from src.ingestion.embedder import embed
-from src.config import FAISS_INDEX_PATH, METADATA_PATH
 import os
+import sys
+
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if root_dir not in sys.path:
+	sys.path.insert(0, root_dir)
+
+from src.ingestion.faiss_store import load_index, load_metadata, search_index
+from src.ingestion.embedder import embed, embed_conversation
+from src.config import FAISS_INDEX_PATH, METADATA_PATH
+from src.services.parser import parse_query
 
 _index = None
 _metadata = None
+
+class RetrievalResult: 
+	def __init__(self, brand=None, model=None, year=None, context=None, source=None):
+		self.brand = brand
+		self.model = model
+		self.year = year
+		self.context = context
+		self.source = source
 
 
 def _load_index_and_metadata():
@@ -22,84 +37,61 @@ def _load_index_and_metadata():
 
 	return _index, _metadata
 
+def create_conversation_text(user_queries, system_responses):
+	merged = []
+	for i in range(len(user_queries) + len(system_responses)):
+		if i % 2 == 0 and user_queries:
+			merged.append(f"User: {user_queries[i // 2]}")
+		elif system_responses:
+			merged.append(f"System: {system_responses[i // 2]}")
+	return "\n".join(merged)
 
-def retrieve_candidates(parsed_query, queries, k=10):
-	# Embed the parsed query as a richer text query
-	query_terms = []
+def retrieve_candidates(user_queries, system_responses, related_cars=None, k=10):
+	related_car_labels = []
+	for car in related_cars or []:
+		related_car_labels.append(f"{car.get('brand', '')} {car.get('model', '')}")
 
-	"""
-	if isinstance(parsed_query, dict):
-		query_terms.extend(parsed_query.get("terms", []))
-		for key in ("fuel_types", "body_styles", "sizes", "use_cases"):
-			query_terms.extend(parsed_query.get(key, []))
-		budget_max = parsed_query.get("budget_max")
-		if budget_max is not None:
-			query_terms.append(f"budget under {budget_max}")
-		seating_min = parsed_query.get("seating_min")
-		if seating_min is not None:
-			query_terms.append(f"{seating_min} seats")
-		transmission = parsed_query.get("transmission")
-		if transmission:
-			query_terms.append(transmission)
-	"""
-	# quick change sam da mi errorje neha metat
-	if isinstance(parsed_query, list):
-		for item in parsed_query:
-			name = item.get("name")
-			value = item.get("value")
-			constraint = item.get("constraint")
+	conversation_text = create_conversation_text(user_queries, system_responses)
 
-			# skip empty fields
-			if value is None:
-				continue
+	print(f"CONVERSATION TEXT: {conversation_text}")
 
-			# handle different field types
-			if name == "seats":
-				query_terms.append(f"{value} seats")
-
-			elif name == "budget":
-				query_terms.append(f"budget {constraint} {value}" if constraint else f"budget {value}")
-
-			elif name == "combined_l_per_100km":
-				query_terms.append(f"{constraint} {value} l/100km" if constraint else f"{value} l/100km")
-
-			else:
-				query_terms.append(str(value))
-
-	query_text = " ".join(query_terms).strip()
-	if not query_text:
-		query_text = "car recommendation"
-
-	print(f"Query text: {query_text}\n")
-
-	query = queries
-
-	# in case of multiple queries:
-	if isinstance(query, list):
-		query = " ".join(query)
-
-	query_emb = embed([query])[0]
-	query_emb = query_emb.astype("float32")
+	conv_embedding = embed_conversation(conversation_text, related_cars=related_car_labels)
 
 	index, metadata = _load_index_and_metadata()
-	scores, ids = search_index(index, query_emb, k=k)
+	scores, ids = search_index(index, conv_embedding, k=20)
 
-	candidates = []
-	context = []
+	seen_models = set()
+	unique_scores = []
+	unique_ids = []
 	for score, idx in zip(scores, ids):
 		meta = metadata[idx]
-		vehicle_label = f"{meta.get('brand', '')} {meta.get('model', '')} {meta.get('year', '')}".strip()
-		candidates.append({
-			"source": meta["source"],
-			"vehicle_label": vehicle_label,
-			"chunk_id": meta["chunk_id"],
-			"score": float(score),
-		})
-		# Load the actual chunk text
-		chunk_text = meta.get("text", f"Chunk {meta['chunk_id']} from {meta['source']}")
-		context.append(f"[{vehicle_label}] {chunk_text}")
+		model = f"{meta.get('brand', '')} {meta.get('model', '')}".strip()
+		# socres are orded from highest to lowest, so the first time we see a model is the one with the highest score
+		if model not in seen_models:
+			seen_models.add(model)
+			unique_scores.append(score)
+			unique_ids.append(idx)
 
-	#print(f"Candidates retrieved: {candidates}\n")
-	#print(f"Context: {context}\n")
+	results = []
 
-	return candidates, context
+	for score, idx in zip(unique_scores, unique_ids):
+		meta = metadata[idx]
+		result = RetrievalResult(
+			brand=meta.get("brand"),
+			model=meta.get("model"),
+			year=meta.get("year"),
+			context=meta.get("text"),
+			source=meta.get("source")
+		)
+		results.append(result)
+
+	return results
+
+
+if __name__ == "__main__":
+	# Example usage
+	user_queries = ['I am looking for an affordable family SUV with 7 seats.', 'I would like to have a diesel with consumption below 8L/100km.']
+	system_responses = ['To help narrow down your options, could you please specify if you prefer a particular make or model? Additionally, do you have any specific requirements for fuel type or seating arrangement comfort?']
+	related_cars = [{'brand': 'Audi', 'model': 'Q7'}, {'brand': 'Land Rover', 'model': 'Discovery'}, {'brand': 'Mercedes-Benz', 'model': 'GL-Class'}]
+	
+	retrieve_candidates(user_queries, system_responses, related_cars, k=5)

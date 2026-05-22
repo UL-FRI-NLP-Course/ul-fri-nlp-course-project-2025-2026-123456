@@ -1,5 +1,7 @@
 import random
+import re
 
+from rapidfuzz import fuzz
 from sqlalchemy import inspect, text
 
 import sys
@@ -216,6 +218,45 @@ def get_all_carapi_cars(limit=100):
 
 def cars_to_dicts(cars):
     return list(cars)
+
+def get_most_similar_value_in_column(column_name: str, value, threshold: float = 0.75):
+    def _normalize(s: str) -> str:
+        if s is None:
+            return ""
+        s = str(s)
+        # Replace non-alphanumeric with nothing and lowercase so spacing is ignored
+        s = re.sub(r'[^0-9A-Za-z]+', ' ', s)
+        return re.sub(r'\s+', '', s).lower().strip()
+
+    unique_values = get_unique_values_from_column(column_name)
+
+    if not unique_values or value is None:
+        return None, 0.0
+
+    a_norm = _normalize(value)
+
+    best = None
+    best_score = 0.0
+
+    for v in unique_values:
+        b_norm = _normalize(v)
+        if not b_norm:
+            continue
+
+        seq_ratio = fuzz.ratio(a_norm, b_norm) / 100.0
+        token_ratio = fuzz.token_set_ratio(a_norm, b_norm) / 100.0
+        substring = 1.0 if (a_norm in b_norm or b_norm in a_norm) else 0.0
+
+        score = max(seq_ratio, token_ratio, substring)
+
+        if score > best_score:
+            best_score = score
+            best = v
+
+    if best_score < float(threshold):
+        return None, 0.0
+
+    return best, float(best_score)
 
 
 def get_unique_values_from_column(column_name: str, limit: int = None):

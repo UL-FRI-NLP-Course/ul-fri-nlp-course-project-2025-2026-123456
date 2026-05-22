@@ -1,8 +1,8 @@
 from src.services.parser import parse_query
-from src.services.retrival import retrieve_candidates
-from src.services.ranking import rank_cars
+from src.services.retrival import create_conversation_text, retrieve_candidates
 from src.services.llm import generate_response
 from src.db.carapi_queries import (
+    get_most_similar_value_in_column,
     query_carapi_by_constraints,
     get_all_carapi_cars,
     cars_to_dicts,
@@ -21,26 +21,25 @@ INSTRUCTIONS = (
     "If the user query is not car related, respond that you can only answer car-related questions."
 )
 
-def generate_prompt(query: str, parsed: dict, ranked: list, context: list):
-    top_cars = ranked[:3]
-    rec_text = "\n".join(
-        [f"- {c.get('make', '')} {c.get('model', '')} ({c.get('year', '')}) (score={c.get('score', 0):.2f})"
-         for c in top_cars]
-    )
+def generate_prompt(conversation: str, car_recommendations: list, context: list):
+    recommended_text = ""
+    for i, car in enumerate(car_recommendations):
+        recommended_text += f"{i+1}. {car.get('brand', '')} {car.get('model', '')}\n"
 
-    ctx_text = "\n---\n".join(context[:5]) if context else ""
+    context_list = []
+    for item in context:
+        single_chunk = f"Source: {item.source}\nBrand: {item.brand}\nModel: {item.model}\nContext: {item.context}\n\n"
+        context_list.append(single_chunk)
+
+    context_text = "\n".join(context_list)
+
 
     prompt = (
-        f"{PERSONA}\n\nUser query: {query}\n\n"
-        f"Top recommendations:\n{rec_text}\n\n"
-        f"Context snippets (each snippet is tagged with the vehicle it belongs to):\n{ctx_text}\n\n"
+        f"{PERSONA}\n\nConversation: {conversation}\n\n"
+        f"Recommendations:\n{recommended_text}\n\n"
+        f"Context snippets (each snippet is tagged with the vehicle it belongs to):\n{context_text}\n\n"
         f"{INSTRUCTIONS}"
     )
-
-    print(f"top cars:\n{top_cars}")
-    print(f"rec text:\n{rec_text}")
-    print(f"ctx text:\n{ctx_text}")
-    print(f"final prompt:\n{prompt}")
 
     return prompt
 
@@ -77,6 +76,65 @@ def generate_raw_prompt(query: str):
     )
 
 
+def merge_database_cars_with_retrieval_results(db_cars, retrieval_results):
+    def car_identifier(brand, model):
+        identifier = f"{brand}{model}"
+        identifier = ''.join(e for e in identifier if e.isalnum()).lower()
+        return identifier
+
+    merged = []
+    unique_cars = set()
+    for car in db_cars: 
+        brand = car.get('brand', '')
+        model = car.get('model', '')
+
+        identifier = car_identifier(brand, model)
+            
+        if identifier not in unique_cars:
+            unique_cars.add(identifier)
+            merged.append({
+                'brand': brand,
+                'model': model,
+            })
+
+    for result in retrieval_results:
+        brand = result.brand
+        model = result.model
+
+        identifier = car_identifier(brand, model)
+
+        if identifier not in unique_cars:
+            unique_cars.add(identifier)
+            merged.append({
+                'brand': brand,
+                'model': model,
+            })
+
+    return merged
+
+
+def filter_retrived_results_by_constraints(retrieved_results, constraints):
+    filtered = []
+    for result in retrieved_results:
+        brand = get_most_similar_value_in_column("make", result.brand)[0]
+        if not brand:
+            continue
+        
+        model = get_most_similar_value_in_column("model", result.model)[0]
+        if not model:
+            continue
+
+        new_constraint = {"make": brand, "model": model, "constraint": "equal"}
+        test_constraints = constraints + [new_constraint]
+
+        db_results = query_carapi_by_constraints(test_constraints, limit=1, unique_models=False)
+        if db_results:
+            filtered.append(result)
+        else:
+            print(f"Filtered out {result.brand} {result.model} because it doesn't match constraints")
+
+    return filtered
+
 def handle_query(query: str, state: ConversationState):
 
     
@@ -84,44 +142,38 @@ def handle_query(query: str, state: ConversationState):
     # that will get as many info for DB cars as possible
     state = make_conversation(query, state)
 
+    state.print_info()
+
     # If conversation is not finished → return early
     if state.status == "NOT READY":
         return state, []
 
 
     # Step 3: Retrieve FAISS context based on parsed query terms
-    candidates, context = retrieve_candidates(state.query_parsed, state.queries, k=10)
+
+    constraints = state.query_parsed
+    retrieved_results = retrieve_candidates(state.queries, state.llm_responses, state.db_cars, k=10)
 
 
-    # Step 4: Build a mapping of FAISS candidate sources to cars
-    # and merge DB results with FAISS scores
-    faiss_scores = {c.get("source", ""): c.get("score", 0.0) for c in candidates}
+    # print(f"RETRIEVED RESULTS:")
+    # for r in retrieved_results:
+    #     print(f" - Brand: {r.brand}, Model: {r.model}, Year: {r.year}, Source: {r.source}")
+    filtered_results = filter_retrived_results_by_constraints(retrieved_results, constraints)
 
+    # print(f"FILTERED RESULTS:")
+    # for r in filtered_results:
+    #     print(f" - Brand: {r.brand}, Model: {r.model}, Year: {r.year}, Source: {r.source}")
 
-    # Combine DB cars with FAISS scores
-    # (cars from DB are already filtered by constraints)
-    for car in state.db_cars_list:
-        source_key = f"{car.get('brand', '')} {car.get('model', '')}"
-        # Normalize FAISS score to [0, 1]
-        car["faiss_score"] = min(faiss_scores.get(source_key, 0.3), 1.0)
+    merged_car_results = merge_database_cars_with_retrieval_results(state.db_cars, filtered_results)
 
-    # If no DB matches, broaden to the full CarAPI dataset.
-    if not state.db_cars_list:
-        state.db_cars_list = get_all_carapi_cars(limit=20)
+    conversation_text = create_conversation_text(state.queries, state.llm_responses)
+    prompt = generate_prompt(conversation_text, merged_car_results, filtered_results)
 
-
-    # Step 5: Rank combined results
-    ranked = rank_cars(state.db_cars_list, state.query_parsed)
-
-    # Step 6: Generate response
-    queries_joined = "\n".join([f"User: {q}" for q in state.queries])
-    #print(f"QUERIES JOINED:\n{queries_joined}")
-    prompt = generate_prompt(queries_joined, state.query_parsed, ranked, context)
     response = generate_response(prompt)
 
-    state.llm_response = response 
+    state.llm_responses.append(response)
 
-    return state, ranked[:3]
+    return state, merged_car_results
 
 
 def handle_query_raw_llm(query: str):

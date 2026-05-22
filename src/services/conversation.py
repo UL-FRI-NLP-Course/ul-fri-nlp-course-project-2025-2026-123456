@@ -31,9 +31,9 @@ class ConversationState:
     def __init__(self):
         self.queries = []                       # list of queries made by user. queries[0] is the original query
         self.query_parsed = {}                  # parsed text for exact filtering
-        self.llm_response = ""                  # llm's response to user's query
+        self.llm_responses = []                  # list of llm's responses to user's query
         self.merge_parsed = False               # whether to add constraints to previous ones, or to reset them
-        self.db_cars_list = []                  # found car's list
+        self.db_cars = []                  # found car's list
         self.status = "START"                   # START, READY -> ready to print recommendations, "NOT READY" - get another query
         self.conversation_round = 0             # number of convos already done between llm and user
         self.max_num_of_convos = 5              # max number of convos between llm and user
@@ -46,7 +46,7 @@ class ConversationState:
         print(f"progress: {self.conversation_round}/{self.max_num_of_convos}")
         print(f"all queries:\n{self.queries}")
         print(f"queries_parsed:\n{self.query_parsed}")
-        print(f"current llm response:\n{self.llm_response}")
+        print(f"current llm response:\n{self.llm_responses[-1] if self.llm_responses else 'No responses yet'}")
         print(f"merge with next parsed: {self.merge_parsed}")
         print(f"status: {self.status}")
         print(f"current unanswered constraints: {self.empty_constraints}")
@@ -195,12 +195,8 @@ def merge_parsed(old: dict, new: dict) -> dict:
     for item in new:
         name = item["name"]
 
-        # If value is None -> remove existing entry
-        # ^ tole je mal sus ampak ideja je, da ce dobimo v nov query za item, k je ze notr v parsu, to loh pomen dve stvari
-        # al smo lihkar vprasal po tej stvari in SPET ni blo jasnga odgovora 
-        # al pa je User rekel, da v bistvu noce tega constrainta vec (kar probably resulta v None)
+    
         if item.get("value") is None:
-            merged.pop(name, None)
             continue
 
         # Otherwise update/add
@@ -263,7 +259,10 @@ def make_conversation(query: str, state: ConversationState):
     # first check whether previous llm response was question -> we need to join the queries
     if state.last_prompt_was_question == True:
 
-        new_query = join_response_answer(state.llm_response, state.queries[-1])
+        #print(f"last llm question: {state.llm_responses[-1] if state.llm_responses else 'No responses yet'}")
+        #print(f"last query: {state.queries[-1]}")
+
+        new_query = join_response_answer(state.llm_responses[-1], state.queries[-1])
         state.queries[-1] = new_query
         state.last_prompt_was_question = False
 
@@ -284,13 +283,29 @@ def make_conversation(query: str, state: ConversationState):
 
 
     # Step 2: Query DB for cars matching constraints
-    db_cars = query_carapi_by_constraints(state.query_parsed, limit=20)
-    db_cars_list = cars_to_dicts(db_cars)
+    db_cars = query_carapi_by_constraints(state.query_parsed, limit=20, unique_models=True)
+    print(f"DB cars found: {len(db_cars)}")
+    print(f"DB cars:\n{db_cars}")
+    state.db_cars = db_cars
 
-    state.db_cars_list = db_cars_list
+    #print()
+    #print()
+    #print("DB CARS")
+    #print(db_cars)
+    #print(f"num of cars found: {len(db_cars)}")
+    #print()
+    #print()
 
 
-    # check if there are any preferences that LLM didn't catch a value of
+
+
+    # here I should add a system that checks whether there too many car in the list
+    # if yes and also if not all constraints are already filled, LLM should ask a person about the missing data (at least most important one)
+    # if there is 0 cars, ask a person to lower standards
+    # if its between 1 and TOO_BROAD_THRESHOLD, continue without asking
+    #print(f"extracted {len(state.db_cars)} constraints:\n{state.query_parsed}")
+
+    # count empty list constraints
     empty_important_constraints = []
     for item in state.query_parsed:
 
@@ -336,7 +351,7 @@ def make_conversation(query: str, state: ConversationState):
         print(f"LLM should ask user about the empty preferences: {state.empty_constraints}")
         llm_response = generate_missing_constraints_response(state.empty_constraints)
 
-        state.llm_response = llm_response
+        state.llm_responses.append(llm_response)
         state.last_prompt_was_question = True # so that we parse llm response plus answer
         #state.merge_parsed = True
         state.status = "NOT READY"          # one more round of convo
@@ -352,20 +367,20 @@ def make_conversation(query: str, state: ConversationState):
 
 
     # case 1: no matching cars
-    if len(db_cars_list) == 0:
+    if len(state.db_cars) == 0:
         
         # try to get better response of user (less constraints)
         print("not enough cars - LLM should tell user to relax preferences")
 
         llm_response = generate_no_car_response(constraints_text)
-        state.llm_response = llm_response
+        state.llm_responses.append(llm_response)
         #state.merge_parsed = False          #because we need less constraints, we reset them
         state.status = "NOT READY"          # one more round of convo
 
         return state
 
     # case 2: too many matching cars
-    if len(db_cars_list) > TOO_BROAD_THRESHOLD:
+    if len(state.db_cars) > TOO_BROAD_THRESHOLD:
 
         # try to get better response of user (more constraints)
         print("too many cars - LLM should tell user to provide some preferences, and then list from which they can choose")
@@ -378,18 +393,18 @@ def make_conversation(query: str, state: ConversationState):
             # if its not empty
             missing_prefs = ", ".join(missing_prefs_list)
             llm_response = generate_many_cars_response(constraints_text, missing_prefs)
-            state.llm_response = llm_response
+
+            # because we need more constraints, we will add them
+            state.llm_responses.append(llm_response)
             #state.merge_parsed = True
             state.status = "NOT READY"
 
             return state
 
-
     # case 3: just enough cars, and not zero
     print(f"just enough cars, we can state the cars")
     state.status = "READY"
     return state
-
 
 
 if __name__ == '__main__':

@@ -25,13 +25,14 @@ def get_model(model_name: str = HF_LLM_MODEL) -> tuple[AutoModelForCausalLM, Aut
     if _model is not None and model_name == _model_name:
         return _model, _tokenizer
     model_name = HF_LLM_MODEL
-    print(HF_LLM_MODEL)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     _tokenizer = AutoTokenizer.from_pretrained(
         model_name,
         trust_remote_code=True,
     )
+
+    if _tokenizer.pad_token is None:
+        _tokenizer.pad_token = _tokenizer.eos_token
 
     if USE_4BIT_QUANTIZATION:
         quant_cfg = BitsAndBytesConfig(
@@ -52,6 +53,7 @@ def get_model(model_name: str = HF_LLM_MODEL) -> tuple[AutoModelForCausalLM, Aut
         attn_implementation="sdpa",
     )
     _model.eval()
+    _model = torch.compile(_model)
 
     return _model, _tokenizer
 
@@ -142,9 +144,9 @@ def generate_json(system_prompt: str, user_prompt: str, column_name: str) -> Dic
 
     raw = run_inference(
         messages,
-        max_new_tokens=80,       # JSON result is always short
-        temperature=0.1,         # near-deterministic — extraction is not creative
-        top_p=0.9,
+        max_new_tokens=32,       # JSON result is always short
+        temperature=0.0,         # near-deterministic — extraction is not creative
+        top_p=1.0,
         repetition_penalty=1.15, # prevents null/null/null loops on hard cases
         do_sample=False,         # greedy decoding: fastest + most consistent
         model_name=HF_LLM_PARSING_MODEL,
