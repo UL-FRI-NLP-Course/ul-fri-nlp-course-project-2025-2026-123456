@@ -194,7 +194,7 @@ That is why a single user query is usually not enough to generate a good recomme
 
 \vspace{3pt}
 \noindent
-To address these issues, we improved the system with creating a conversational LLM.
+To address these issues, we improved the system with creating a conversational LLM
 (marked on Figure \ref{CRS diagram} with the same name). This model 
 interacts with the user to complete missing constraints and suggest additional 
 attributes that could be in interest to the user.
@@ -243,13 +243,12 @@ and F1 score. We also run the same evaluation for a baseline LLM without
 any system support.
 
 The second evaluation tests the conversational setup. This evaluation 
-is not fully automated. We use the same queries as before, but simulate 
-multi-turn interaction by providing follow-up responses after each LLM question. 
+is not fully automated. We use the same queries as before, but divide them 
+into few parts. We simulate 
+multi-turn interaction by providing additional part after each LLM question. 
 After the conversation ends, we store the final set of recommended cars and 
 compare it to the expected set obtained from the structured database using 
-the manually parsed query. We also join user's multiple queries into one and 
-send them to the non-conversational and baseline LLM. It is not fully 
-fair, but we also compare evaluation of our main pipeline with these two.
+the manually parsed query. We also compare that to two baselines
 
 The third evaluation tests whether the RAG component is working correctly.
 After each recommendation, we manually check whether the returned cars 
@@ -261,6 +260,38 @@ satisfy the user's stated preferences.
 %------------------------------------------------
 
 \section*{Results}
+
+Example of one conversation: 
+"   ".
+
+
+\noindent
+Results of the two tests:
+
+\begin{table}[H]
+\resizebox{1.0 \linewidth}{!}
+{\begin{tabular}{| c | c c c c c |}
+
+\hline
+Model & \makecell{number of \\ correctly retrieved \\ cars} & \makecell{number of \\ missed \\ cars} & precision  & recall & F1 \\ 
+\hline
+baseline LLM  &  1 &  1 & 1 & 1 & 1 \\
+\hline
+\makecell{CRS \\ non-conversational}  &  1 &  1 & 1 & 1 & 1 \\
+\hline
+\makecell{CRS \\ conversational}   &  1 &  1 & 1 & 1 & 1 \\
+\hline
+
+\end{tabular}}
+\caption{
+    Results of the first and second evaluation tests
+}
+\label{tab:CRS results}
+\end{table}
+\FloatBarrier
+
+
+
 
 %------------------------------------------------
 
