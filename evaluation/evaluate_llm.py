@@ -14,6 +14,7 @@ from src.db.database import init_db
 # from src.services.llm import init_llm
 from src.main import init_rag
 from src.ingestion.embedder import init_embedder
+from src.services.conversation import ConversationState
 
 
 @contextmanager
@@ -36,6 +37,8 @@ def evaluate(raw_llm=False, with_cpu=True):
         # print("Running in raw LLM mode (no RAG context or database recommendations)")
     else:
         init_rag()
+
+    state = ConversationState()
 
     # print("Conversational Recommender System for Vehicles")
     # print("Type 'exit' or 'quit' to stop.\n")
@@ -66,19 +69,21 @@ def evaluate(raw_llm=False, with_cpu=True):
                 # print("\n[Processing...]")
                 if raw_llm:
                     with suppress_stdout():
-                        result = handle_query_raw_llm(query)
+                        top_cars = handle_query_raw_llm(query)
                 else:
                     with suppress_stdout():
-                        result = handle_query(query)
+                        state, top_cars = handle_query(query, state)
 
                 # print("\nResponse:")
                 # print(result.get("response", "No response generated"))
 
                 top_answers = []
 
-                if not raw_llm:
+                print(state.status)
+
+                if state.status == "READY":
                     # print("\nTop Recommendations:")
-                    for i, rec in enumerate(result.get("recommendations", [])[:3], 1):
+                    for i, rec in enumerate(top_cars[:3], 1):
                         brand = rec.get("brand", "Unknown")
                         model = rec.get("model", "")
                         # print(f"  {i}. {brand} {model}\n")
@@ -96,7 +101,7 @@ def evaluate(raw_llm=False, with_cpu=True):
             f_result.write(json.dumps(expected))
             f_result.write(json.dumps(top_answers) + "\n")
 
-            print(result)
+            print(top_cars)
 
     f_result.close()
 

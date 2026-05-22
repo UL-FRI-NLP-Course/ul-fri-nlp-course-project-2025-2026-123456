@@ -79,7 +79,9 @@ def get_data(brands, min_year=None, only_latest=True):
 
         # if download_all:
         #     return
-        
+        #if download_all:
+        #    return
+
         # filter by year
         for model, versions in dicti.items():
             download_from = 0

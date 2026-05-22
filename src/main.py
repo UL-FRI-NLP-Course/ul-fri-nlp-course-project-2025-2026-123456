@@ -12,6 +12,8 @@ from src.db.database import init_db
 # from src.services.llm import init_llm
 from src.ingestion.embedder import init_embedder
 
+from src.services.conversation import ConversationState
+
 def init_rag():
     if not os.path.exists(FAISS_INDEX_PATH):
         print("ERROR: FAISS index not found.")
@@ -36,6 +38,8 @@ def main(raw_llm=False):
     print("Conversational Recommender System for Vehicles")
     print("Type 'exit' or 'quit' to stop.\n")
 
+    state = ConversationState()
+
     while True:
         try:
             query = input("You: ").strip()
@@ -49,18 +53,25 @@ def main(raw_llm=False):
             print("\n[Processing...]")
             if raw_llm:
                 result = handle_query_raw_llm(query)
+
+                print("\nResponse:")
+                print(result.get("response", "No response generated"))
+
             else:
-                result = handle_query(query)
+                # LLM + RAG
+                state, top_cars = handle_query(query, state)
 
-            print("\nResponse:")
-            print(result.get("response", "No response generated"))
+                print("\nResponse:")
+                print(state.llm_response)
 
-            if not raw_llm:
-                print("\nTop Recommendations:")
-                for i, rec in enumerate(result.get("recommendations", [])[:3], 1):
-                    brand = rec.get("brand", "Unknown")
-                    model = rec.get("model", "")
-                    print(f"  {i}. {brand} {model}\n")
+                # check whether already we print reommendations 
+                # or did we ask user to provide additional info
+                if state.status == "READY":
+                    print("\nTop Recommendations:")
+                    for i, rec in enumerate(top_cars[:3], 1):
+                        brand = rec.get("brand", "Unknown")
+                        model = rec.get("model", "")
+                        print(f"  {i}. {brand} {model}\n")
 
         except KeyboardInterrupt:
             print("\n\nInterrupted. Goodbye!")
