@@ -139,28 +139,28 @@ def extract_related_columns(query):
     return related_columns
 
 
-def parse_query(query: str, zacasni_idx: int):
+def parse_query(query: str, zacasni_idx: int = 1):
 
-    if zacasni_idx == 1:
+    # if zacasni_idx == 1:
 
-        sample = [
-            {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'},
-            {'name': 'seats', 'value': None, 'constraint': 'min'},
-            {'name': 'fuel_type', 'value': 'electric', 'constraint': 'equal'},
-            {'name': 'combined_l_per_100km', 'value': None, 'constraint': None},
-        ]
+    #     sample = [
+    #         {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'},
+    #         {'name': 'seats', 'value': None, 'constraint': 'min'},
+    #         {'name': 'fuel_type', 'value': 'electric', 'constraint': 'equal'},
+    #         {'name': 'combined_l_per_100km', 'value': None, 'constraint': None},
+    #     ]
 
-    elif zacasni_idx == 2:
-        sample = [
-            {'name': 'seats', 'value': '5', 'constraint': 'min'}
-        ]
-    else: 
+    # elif zacasni_idx == 2:
+    #     sample = [
+    #         {'name': 'seats', 'value': '5', 'constraint': 'min'}
+    #     ]
+    # else: 
 
-        sample = [
-            {'name': 'combined_l_per_100km', 'value': None, 'constraint': None}
-        ]
+    #     sample = [
+    #         {'name': 'combined_l_per_100km', 'value': None, 'constraint': None}
+    #     ]
         
-    return sample
+    # return sample
 
     related_columns = extract_related_columns(query)
 

@@ -82,7 +82,7 @@ def main():
         # 4. Sample query by make
         print_section("4. SAMPLE QUERY")
 
-        make = "BMW"
+        make = "Ford"
 
         cars = session.query(CarApiCar).filter(
             CarApiCar.make.ilike(make)

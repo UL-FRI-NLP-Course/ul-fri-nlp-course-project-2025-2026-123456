@@ -125,6 +125,32 @@ def embed_column(text: str, model_name: str = None):
 
     return embed([formatted_text], model_name=model_name)[0]
 
+def embed_conversation(conversation: str, related_cars: list = None, model_name: str = None):
+    if model_name is None:
+        model_name = EMBEDDING_MODEL
+
+    if model_name.startswith('Qwen'):
+        formatted_conversation = format_conversation_qwen(conversation, related_cars)
+    else:
+        related_cars_text = f"Related cars: {', '.join(related_cars)}\n" if related_cars else ""
+        formatted_conversation = f"{conversation}\n{related_cars_text}"
+
+    return embed([formatted_conversation], model_name=model_name)[0]
+
+def format_pdf_chunk_qwen(chunk_text: str, pdf_source: str, brand: str, model: str, year: str) -> str:
+    instruction = " Represent this car brochure passage for retrieval based on user's preferences regarding vehicle features, specifications, and options."
+    formatted_chunk = f"Instruct: {instruction}\nChunk Text: {chunk_text}\nSource: {pdf_source}\nBrand: {brand}\nModel: {model}\nYear: {year}"
+    return formatted_chunk
+
+def format_conversation_qwen(conversation: str, related_cars: list = None) -> str:
+    instruction = "Given the following conversation between a user and a car recommender system, find the most relevant vehicle information in the promotional brochures."
+    if related_cars:
+        related_cars_text = ', '.join(related_cars)
+        instruction += f" Also consider these related cars that match the user's preferences: {related_cars_text}."
+        formatted_conversation = f"Instruct {instruction}\nConversation:\n{conversation}"
+        return formatted_conversation
+    
+    return f"Instruct: {instruction}\nConversation:\n{conversation}"
 
 def format_query_qwen(query: str) -> str:
     instruction = "Given a natural language query, identify the relevant columns from a vehicle database schema that would be useful for answering the query."

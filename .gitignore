@@ -150,3 +150,6 @@ data/carapi_column_embeddings.npy
 # Benchmark intermediate files
 benchmark/leave_one_out/
 benchmark/embeddings/
+
+# LLM models
+models/

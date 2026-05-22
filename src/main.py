@@ -27,18 +27,25 @@ def init_rag():
 
     init_embedder()
 
-def main(raw_llm=False):
+def main(raw_llm=False, single_turn=False):
     # init_llm()
 
     if raw_llm:
         print("Running in raw LLM mode (no RAG context or database recommendations)")
     else:
+        if single_turn:
+            print("Running in RAG-like LLM single turn mode")
+        else:
+            print("Running in RAG-like LLM conversational mode")
+
         init_rag()
+
 
     print("Conversational Recommender System for Vehicles")
     print("Type 'exit' or 'quit' to stop.\n")
 
     state = ConversationState()
+    state.single_turn = single_turn
 
     while True:
         try:
@@ -62,13 +69,13 @@ def main(raw_llm=False):
                 state, top_cars = handle_query(query, state)
 
                 print("\nResponse:")
-                print(state.llm_response)
+                # print(state.llm_response)
 
                 # check whether already we print reommendations 
                 # or did we ask user to provide additional info
                 if state.status == "READY":
                     print("\nTop Recommendations:")
-                    for i, rec in enumerate(top_cars[:3], 1):
+                    for i, rec in enumerate(top_cars[:10], 1):
                         brand = rec.get("brand", "Unknown")
                         model = rec.get("model", "")
                         print(f"  {i}. {brand} {model}\n")
@@ -83,4 +90,24 @@ def main(raw_llm=False):
 
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--raw-llm",
+        action="store_true",
+        help="Run without RAG (pure LLM mode)"
+    )
+
+    parser.add_argument(
+        "--single-turn",
+        action="store_true",
+        help="Run LLM in stateless single-turn mode (no conversation, no memory)"
+    )
+
+    args = parser.parse_args()
+
+    main(
+        raw_llm=args.raw_llm,
+        single_turn=args.single_turn
+    )

@@ -51,4 +51,74 @@ def chunk_text(text, max_chars=800, overlap=100):
             chunks.append(chunk)
             start += max_chars - overlap
         return chunks
+
+
+def extract_headings(pdf_path, size_multiplier=1.25, min_abs_size=11):
+    doc = pymupdf.open(pdf_path)
+
+    # 1) Try TOC / bookmarks first
+    toc = doc.get_toc(simple=True)
+    if toc:
+        # toc entries: (level, title, page)
+        return [entry[1].strip() for entry in toc if entry[1].strip()]
+
+    # 2) Gather all spans with their font sizes and names
+    spans = []
+    for page in doc:
+        info = page.get_text("dict")  # blocks -> lines -> spans
+        for b in info.get("blocks", []):
+            for line in b.get("lines", []):
+                for span in line.get("spans", []):
+                    text = span.get("text", "").strip()
+                    if not text:
+                        continue
+                    spans.append({
+                        "text": text,
+                        "size": span.get("size", 0),
+                        "font": span.get("font", "").lower(),
+                        "bbox": span.get("bbox", None),
+                        "page": page.number + 1
+                    })
+
+    if not spans:
+        return []
+
+    # 3) Compute a dynamic threshold: > median * multiplier or > min_abs_size
+    sizes = [s["size"] for s in spans if s["size"] > 0]
+    median = sorted(sizes)[len(sizes)//2]
+    threshold = max(median * size_multiplier, min_abs_size)
+
+    # 4) Heuristics: big size OR font name contains 'bold' OR all-caps short line
+    candidates = []
+    for s in spans:
+        t = s["text"]
+        votes = 0
+        is_big = s["size"] >= threshold
+        is_bold = "bold" in s["font"] or "black" in s["font"]
+        is_caps = t.upper() == t
+        is_correct_length = 5 <= len(t) <= 100
+
+        if is_big and is_correct_length or is_bold and is_correct_length or is_caps and is_correct_length:
+            clean = " ".join(t.split())
+            if len(clean) > 1 and not clean.endswith(":"):
+                candidates.append(clean)
+
+    # 5) De-duplicate while preserving order, optional frequency filter
+    seen = set()
+    unique = []
+    for c in candidates:
+        key = c.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(c)
+
+    return unique
     
+
+if __name__ == "__main__":
+    pdf_path = r"C:\Development\Sola\NLP\ul-fri-nlp-course-project-2025-2026-123456\data\pdfs\lexus\Lexus_US LS_2025.pdf"
+    headings = extract_headings(pdf_path)
+    print("Extracted Headings:")
+    for h in headings:
+        print(f"  {h}")

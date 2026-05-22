@@ -10,26 +10,31 @@ if PROJECT_ROOT not in sys.path:
 
 from scripts.get_pdf_data import get_brand_model_year
 from src.ingestion.chunker import extract_chunks
-from src.ingestion.embedder import embed
+from src.ingestion.embedder import embed, format_pdf_chunk_qwen
 from src.ingestion.faiss_store import build_faiss_index, save_index, save_metadata
 from src.config import PDF_ROOT, VECTOR_STORE_DIR, FAISS_INDEX_PATH, METADATA_PATH, EMBEDDING_MODEL # , SENTENCE_TRANSFORMER_MODEL
+from src.config import PDF_ROOT, VECTOR_STORE_DIR, FAISS_INDEX_PATH, METADATA_PATH, EMBEDDING_MODEL
 import numpy as np
 
 def build_corpus(pdf_path):
     meta = []
-    chunks = extract_chunks(pdf_path)
+    chunks = []
+    raw_chunks = extract_chunks(pdf_path)
     pdf_name = os.path.basename(pdf_path)
     brand, model, year = get_brand_model_year(pdf_name)
-    for i, c in enumerate(chunks):  
-            meta.append({
-                "source": pdf_name,
-                "brand": brand,
-                "model": model,
-                "year": year,
-                "chunk_id": i,
-                "text": c  
-                
-            })
+    for i, c in enumerate(raw_chunks):
+        chunk = format_pdf_chunk_qwen(c, pdf_name, brand, model, year)
+
+        chunks.append(chunk)
+        meta.append({
+            "source": pdf_name,
+            "brand": brand,
+            "model": model,
+            "year": year,
+            "chunk_id": i,
+            "text": c
+
+        })
     return chunks, meta
 
 def main():
@@ -50,6 +55,8 @@ def main():
             all_chunks.extend(chunks)
             all_meta.extend(meta)
             print(f"    Extracted {len(chunks)} chunks")
+    print(f"Total chunks extracted: {len(all_chunks)}")
+
 
     print("\n[3] Computing embeddings...")
     print(f"  Using model: {EMBEDDING_MODEL}")
@@ -65,6 +72,10 @@ def main():
     save_metadata(all_meta, METADATA_PATH)
     print(f"  Index saved to: {FAISS_INDEX_PATH}")
     print(f"  Metadata saved to: {METADATA_PATH}")
+
+    # create a file called finish.txt to indicate the process is complete
+    with open(os.path.join(VECTOR_STORE_DIR, "finish.txt"), "w") as f:
+        f.write("Ingestion complete")
 
 
 if __name__ == "__main__":

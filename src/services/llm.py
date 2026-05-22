@@ -179,9 +179,9 @@ def generate_json(system_prompt: str, user_prompt: str, column_name: str) -> Dic
 
     raw = run_inference(
         messages,
-        max_new_tokens=80,       # JSON result is always short
-        temperature=0.1,         # near-deterministic — extraction is not creative
-        top_p=0.9,
+        max_new_tokens=32,       # JSON result is always short
+        temperature=0.0,         # near-deterministic — extraction is not creative
+        top_p=1.0,
         repetition_penalty=1.15, # prevents null/null/null loops on hard cases
         do_sample=False,         # greedy decoding: fastest + most consistent
         model_name=HF_LLM_PARSING_MODEL,
