@@ -40,12 +40,19 @@ def evaluate(raw_llm=False, with_cpu=True):
 
     state = ConversationState()
 
+    input_path = "evaluation/eval_dataset.jsonl"
+    output_path = "evaluation/eval_results.jsonl"
+
     # print("Conversational Recommender System for Vehicles")
     # print("Type 'exit' or 'quit' to stop.\n")
 
-    with open("evaluation/eval_dataset.jsonl", "r") as f:
+    total = 0
+    correct_top1 = 0
+    correct_top3 = 0
 
-        f_result = open("evaluation/eval_results.jsonl", "w")
+    with open(input_path, "r") as f:
+
+        f_result = open(output_path, "w")
 
         for line in f:
 
@@ -55,6 +62,8 @@ def evaluate(raw_llm=False, with_cpu=True):
 
             print(question)
             print(expected)
+
+            top_answers = []
 
             try:
                 # query = input("You: ").strip()
@@ -69,25 +78,87 @@ def evaluate(raw_llm=False, with_cpu=True):
                 # print("\n[Processing...]")
                 if raw_llm:
                     with suppress_stdout():
-                        top_cars = handle_query_raw_llm(query)
+                        response = handle_query_raw_llm(query)
                 else:
                     with suppress_stdout():
-                        state, top_cars = handle_query(query, state)
+                        state = ConversationState()
+                        state, response = handle_query(query, state)
 
                 # print("\nResponse:")
                 # print(result.get("response", "No response generated"))
 
-                top_answers = []
+                # top_answers = []
 
                 print(state.status)
 
                 if state.status == "READY":
                     # print("\nTop Recommendations:")
-                    for i, rec in enumerate(top_cars[:3], 1):
+                    for i, rec in enumerate(response[:3], 1):
                         brand = rec.get("brand", "Unknown")
                         model = rec.get("model", "")
                         # print(f"  {i}. {brand} {model}\n")
-                        top_answers.append(str(brand) + " " + str(model))
+                        top_answers.append(f"{brand} {model}".strip())
+
+                print("Predicted:", top_answers)
+
+                total += 1
+
+                expected_set = {
+                    x.lower().strip()
+                    for x in expected
+                }
+
+                predicted_set = {
+                    x.lower().strip()
+                    for x in top_answers
+                }
+
+                if len(predicted_set) > 0:
+                    if expected_set == predicted_set[0]:
+                        correct_top1 += 1
+
+                if expected_set in predicted_set:
+                    correct_top3 += 1
+
+                # expected_set = set(expected)
+                # predicted_set = set(top_answers)
+
+                intersection = expected_set & predicted_set
+
+                correct = len(intersection)
+                extra = len(predicted_set - expected_set)
+                missed = len(expected_set - predicted_set)
+
+                precision = correct / len(predicted_set) if predicted_set else 0
+                recall = correct / len(expected_set) if expected_set else 0
+
+                f1 = (
+                    2 * precision * recall / (precision + recall)
+                    if (precision + recall) > 0
+                    else 0
+                )
+
+                result_row = {
+                    "question": question,
+                    "expected": expected,
+                    "predicted": top_answers,
+                    # "top1_correct": (
+                    #         len(predicted_set) > 0
+                    #         and expected_set == predicted_set[0]
+                    # ),
+                    "top3_correct": (
+                            expected_set in predicted_set
+                    ),
+                    "intersection": list(intersection),
+                    "correct_count": correct,
+                    "extra_count": extra,
+                    "missed_count": missed,
+                    "precision": precision,
+                    "recall": recall,
+                    "f1": f1,
+                }
+
+                f_result.write(json.dumps(result_row) + "\n")
 
             except KeyboardInterrupt:
                 # print("\n\nInterrupted. Goodbye!")
@@ -97,11 +168,24 @@ def evaluate(raw_llm=False, with_cpu=True):
                 import traceback
                 traceback.print_exc()
 
-            f_result.write(json.dumps(question))
-            f_result.write(json.dumps(expected))
-            f_result.write(json.dumps(top_answers) + "\n")
+    print("\n========================")
+    print("Evaluation Complete")
+    print("========================")
 
-            print(top_cars)
+    if total > 0:
+        print(f"Samples: {total}")
+        print(f"Top-1 Accuracy: {correct_top1 / total:.2%}")
+        print(f"Top-3 Accuracy: {correct_top3 / total:.2%}")
+
+    summary = {
+        "summary": {
+            "samples": total,
+            "top1_accuracy": correct_top1 / total if total > 0 else 0,
+            "top3_accuracy": correct_top3 / total if total > 0 else 0,
+        }
+    }
+
+    f_result.write(json.dumps(summary) + "\n")
 
     f_result.close()
 
