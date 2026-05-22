@@ -27,8 +27,8 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
-def evaluate(raw_llm=False, with_cpu=False):
-    if not with_cpu:
+def evaluate(raw_llm=False, with_ollama=False):
+    if not with_ollama:
         from src.services.llm import init_llm
         init_llm()
 
@@ -39,8 +39,9 @@ def evaluate(raw_llm=False, with_cpu=False):
         init_rag()
 
     state = ConversationState()
+    state.single_turn = True
 
-    input_path = "evaluation/eval_dataset.jsonl"
+    input_path = "evaluation/eval_tests.jsonl"
     output_path = "evaluation/eval_results.jsonl"
 
     # print("Conversational Recommender System for Vehicles")
@@ -82,6 +83,7 @@ def evaluate(raw_llm=False, with_cpu=False):
                 else:
                     with suppress_stdout():
                         state = ConversationState()
+                        state.single_turn = True
                         state, response = handle_query(query, state)
 
                 # print("\nResponse:")
@@ -93,7 +95,7 @@ def evaluate(raw_llm=False, with_cpu=False):
 
                 if state.status == "READY":
                     # print("\nTop Recommendations:")
-                    for i, rec in enumerate(response[:3], 1):
+                    for i, rec in enumerate(response, 1):
                         brand = rec.get("brand", "Unknown")
                         model = rec.get("model", "")
                         # print(f"  {i}. {brand} {model}\n")
