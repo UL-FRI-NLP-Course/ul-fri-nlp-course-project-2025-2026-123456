@@ -192,9 +192,6 @@ def merge_parsed(old: dict, new: dict) -> dict:
     # Create lookup table from old entries
     merged = {item["name"]: item.copy() for item in old}
 
-    # Update or insert new entries
-    merged = {item["name"]: item.copy() for item in old}
-
     for item in new:
         name = item["name"]
 
@@ -302,7 +299,7 @@ def make_conversation(query: str, state: ConversationState):
 
         # set default constraint 
         if val is not None and con is None:
-            state.query_parsed[item][con] = "equal"
+            item["constraint"] = "equal"
 
         if val is None:
             empty_important_constraints.append(item.get("name"))
