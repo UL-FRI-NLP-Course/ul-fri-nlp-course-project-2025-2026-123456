@@ -224,7 +224,7 @@ def get_most_similar_value_in_column(column_name: str, value, threshold: float =
         if s is None:
             return ""
         s = str(s)
-        # Replace non-alphanumeric with nothing and lowercase so spacing is ignored
+        # Replace non-alphanumeric with nothing and lowercase
         s = re.sub(r'[^0-9A-Za-z]+', ' ', s)
         return re.sub(r'\s+', '', s).lower().strip()
 
@@ -245,9 +245,8 @@ def get_most_similar_value_in_column(column_name: str, value, threshold: float =
 
         seq_ratio = fuzz.ratio(a_norm, b_norm) / 100.0
         token_ratio = fuzz.token_set_ratio(a_norm, b_norm) / 100.0
-        substring = 1.0 if (a_norm in b_norm or b_norm in a_norm) else 0.0
 
-        score = max(seq_ratio, token_ratio, substring)
+        score = max(seq_ratio, token_ratio)
 
         if score > best_score:
             best_score = score

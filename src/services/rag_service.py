@@ -130,8 +130,6 @@ def filter_retrived_results_by_constraints(retrieved_results, constraints):
         db_results = query_carapi_by_constraints(test_constraints, limit=1, unique_models=False)
         if db_results:
             filtered.append(result)
-        else:
-            print(f"Filtered out {result.brand} {result.model} because it doesn't match constraints")
 
     return filtered
 
@@ -142,27 +140,17 @@ def handle_query(query: str, state: ConversationState):
     # that will get as many info for DB cars as possible
     state = make_conversation(query, state)
 
-    state.print_info()
-
     # If conversation is not finished → return early
     if state.status == "NOT READY":
         return state, []
 
 
-    # Step 3: Retrieve FAISS context based on parsed query terms
-
+    # Step 3: Retrieve FAISS context based on user query and LLM responses, and filter them based on constraints
     constraints = state.query_parsed
     retrieved_results = retrieve_candidates(state.queries, state.llm_responses, state.db_cars, k=10)
 
 
-    # print(f"RETRIEVED RESULTS:")
-    # for r in retrieved_results:
-    #     print(f" - Brand: {r.brand}, Model: {r.model}, Year: {r.year}, Source: {r.source}")
     filtered_results = filter_retrived_results_by_constraints(retrieved_results, constraints)
-
-    # print(f"FILTERED RESULTS:")
-    # for r in filtered_results:
-    #     print(f" - Brand: {r.brand}, Model: {r.model}, Year: {r.year}, Source: {r.source}")
 
     merged_car_results = merge_database_cars_with_retrieval_results(state.db_cars, filtered_results)
 

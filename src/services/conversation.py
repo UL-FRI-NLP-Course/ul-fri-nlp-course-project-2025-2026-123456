@@ -284,26 +284,7 @@ def make_conversation(query: str, state: ConversationState):
 
     # Step 2: Query DB for cars matching constraints
     db_cars = query_carapi_by_constraints(state.query_parsed, limit=20, unique_models=True)
-    print(f"DB cars found: {len(db_cars)}")
-    print(f"DB cars:\n{db_cars}")
     state.db_cars = db_cars
-
-    #print()
-    #print()
-    #print("DB CARS")
-    #print(db_cars)
-    #print(f"num of cars found: {len(db_cars)}")
-    #print()
-    #print()
-
-
-
-
-    # here I should add a system that checks whether there too many car in the list
-    # if yes and also if not all constraints are already filled, LLM should ask a person about the missing data (at least most important one)
-    # if there is 0 cars, ask a person to lower standards
-    # if its between 1 and TOO_BROAD_THRESHOLD, continue without asking
-    #print(f"extracted {len(state.db_cars)} constraints:\n{state.query_parsed}")
 
     # count empty list constraints
     empty_important_constraints = []
@@ -326,7 +307,6 @@ def make_conversation(query: str, state: ConversationState):
 
     # if it's a single turn, then we leave after first parsing
     if state.single_turn:
-        print("SINGLE TURN CONVO - leaving make conversation")
         state.status = "READY"
         return state
 
@@ -335,20 +315,15 @@ def make_conversation(query: str, state: ConversationState):
     fin = do_we_finish(state.conversation_round, state.query_parsed)
 
     if fin:
-        print("CONVO WAS ALREADY TOO LONG BYE")
         state.status = "READY"
 
         return state
 
 
-
-    #print("\n[Processing Convo...]")
-
-
     # ROUND 1 OF QUESTIONING: LLM should ask about empty constraiants 
     if len(state.empty_constraints) > 0:
 
-        print(f"LLM should ask user about the empty preferences: {state.empty_constraints}")
+        #print(f"LLM should ask user about the empty preferences: {state.empty_constraints}")
         llm_response = generate_missing_constraints_response(state.empty_constraints)
 
         state.llm_responses.append(llm_response)
@@ -370,7 +345,7 @@ def make_conversation(query: str, state: ConversationState):
     if len(state.db_cars) == 0:
         
         # try to get better response of user (less constraints)
-        print("not enough cars - LLM should tell user to relax preferences")
+        #print("not enough cars - LLM should tell user to relax preferences")
 
         llm_response = generate_no_car_response(constraints_text)
         state.llm_responses.append(llm_response)
@@ -383,7 +358,7 @@ def make_conversation(query: str, state: ConversationState):
     if len(state.db_cars) > TOO_BROAD_THRESHOLD:
 
         # try to get better response of user (more constraints)
-        print("too many cars - LLM should tell user to provide some preferences, and then list from which they can choose")
+        #print("too many cars - LLM should tell user to provide some preferences, and then list from which they can choose")
 
         # get missing preferences
         missing_prefs_list = get_missing_preferences(state.query_parsed, IMPORTANT_CONSTRAINTS)
@@ -402,7 +377,7 @@ def make_conversation(query: str, state: ConversationState):
             return state
 
     # case 3: just enough cars, and not zero
-    print(f"just enough cars, we can state the cars")
+    #print(f"just enough cars, we can state the cars")
     state.status = "READY"
     return state
 

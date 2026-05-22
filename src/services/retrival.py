@@ -53,8 +53,6 @@ def retrieve_candidates(user_queries, system_responses, related_cars=None, k=10)
 
 	conversation_text = create_conversation_text(user_queries, system_responses)
 
-	print(f"CONVERSATION TEXT: {conversation_text}")
-
 	conv_embedding = embed_conversation(conversation_text, related_cars=related_car_labels)
 
 	index, metadata = _load_index_and_metadata()
