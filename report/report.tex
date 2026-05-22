@@ -122,7 +122,7 @@ In the context of vehicle recommendation, Beddouda et al. \cite{beddoudavehicle}
 
 For general CRS, several multi-turn dialogue systems have been proposed, especially in the travel domain. Liao et al. \cite{liao2019deepconversationalrecommendertravel} proposed a deep recommender system using seq2seq with a neural latent topic component. Baizal et al. \cite{baizal2021tourism} introduced an ontology-based system, and Carrillo et al. \cite{carrillo2023smarttur+} introduced a system that uses Chatbot to collect user preferences and generates similarity-based recommendations using SBERT embeddings.
 
-In addition to the travel domain, CRS have been implemented in several other domains. Sun et al. \cite{sun2018conversational} developed a reinforcement learning based CRS for restaurant recommendation using Yelp review data. Zhu et al. \cite{zhu2025collaborative} proposed a movie recommendation CRS using retrieval-augmented generation (RAG) approach in combination with a large language model (LLM).
+In addition to the travel domain, CRS have been implemented in several other domains. Sun et al. \cite{sun2018conversational} developed a reinforcement learning based CRS for restaurant recommendation using Yelp review data. Zhu et al. \cite{zhu2025collaborative} proposed a movie recommendation CRS using retrieval-augmented generation (RAG) approach in combination with a large language model.
 
 
 %------------------------------------------------
@@ -213,12 +213,13 @@ attributes that could be in interest to the user.
 Then the system employs a dual data strategy using databases described
 in the previous section.
 First, we use parsed query in structured database using constraint-based filtering,
-which initially reduces the candidate set.
-The parsed query is then 
-embedded and used for semantic search in the FAISS vector database. This 
-search returns columns relevant to user's query.
-\noindent
-\textbf{TODO: dokončej to ko bo retrival.py done}
+which yields the first candidate set. Next we embed not user's latest query but the 
+entire conversation history. Since the user's responses might be incomplete, 
+using the full dialoge helps capture user's intent. 
+This embedding is then used for semantic search in the FAISS vector database, which returns 
+relevant parts from vehicle brochures. From that text we extract the second set of cars candidates,
+which is again filtered using the previously obtainet constraints. 
+
 
 After that, the system combines both retrieved sets of car candidates.
 Then cars from this merged set are ranked according to how well 
@@ -241,62 +242,40 @@ and comments on the key differences between the suggested cars.
 
 
 
-\section*{Evaluation of a model}
+\subsubsection*{Evaluation methods}
 
-Evaluation ideas:
+\textbf{TODO: add LLM's names} 
 
-\noindent
-\underline{Test if RAG is working well}
+Evaluating language models is challenging because their outputs are not 
+fully deterministic, especially when they are in conversation mode. We 
+designed three different tests to evaluate the system and the models.
 
-\vspace{5pt}
-\noindent
-Build a small controlled dataset (10 very different cars), where only one is 
-meeting the requirements. Ask the system to recommend a car and check if 
-it picks only the valid one.
+First, we evaluate whether the system performs better than a baseline. 
+We manually created a set of user queries and manually parsed them into 
+constraints (similar to Table \ref{tab:parsed query example}). 
+We then ran our system in non-conversational mode, 
+which directly returns a set of recommended cars. This result is compared 
+to the set of cars obtained from the structured database using the manually 
+verified constraints. From this comparison, we compute standard metrics 
+such as number of correctly retrieved cars, missed cars, precision, recall, 
+and F1 score. We also run the same evaluation for a baseline LLM without 
+any system support.
+
+The second evaluation tests the conversational setup. This evaluation 
+is not fully automated. We use the same queries as before, but simulate 
+multi-turn interaction by providing follow-up responses after each LLM question. 
+After the conversation ends, we store the final set of recommended cars and 
+compare it to the expected set obtained from the structured database using 
+the manually parsed query. We also join user's multiple queries into one and 
+send them to the non-conversational and baseline LLM. It is not fully 
+fair, but we also compare evaluation of our main pipeline with these two.
+
+The third evaluation tests whether the RAG component is working correctly.
+After each recommendation, we manually check whether the returned cars 
+satisfy the user's stated preferences.
 
 
-\vspace{7pt}
-\noindent
-\underline{Compare CRS to other LLMs}
 
-\vspace{5pt}
-\noindent
-Another idea is also creating a few prompts, for which we find a set of suitable cars. Then 
-we compare the output of our CRS system and one another LLM (preferably one that doesn't have 
-access to web). Then we evaluate if the LLMs found any car from the set.
-
-
-\vspace{7pt}
-\noindent
-\underline{Compare CRS to some website}
-
-\vspace{5pt}
-\noindent
-Compare recommendation to some website (Carwow, Autotrader according to chatgpt) and compare for 
-the same requirements the models output, though it is
-subjective method of evaluation (hard to tell which model is better, no hard truth on this topic)
-
-\vspace{7pt}
-\noindent
-\underline{Advanced method - baseline filter model}
-
-\vspace{5pt}
-\noindent
-Ideally (but too complicated to implement in such short time) would be to create a basic 
-filtering system, and conmpare the outputs with what the LLM is offering. Again the idea wouldn't 
-be to show it is better output objectively but either it shows more option, or wilder choices, etc. 
-Especially if the requirements are not precise or not coherent between themselves 
-(for instance big car + low consumption + high acceleration)
-
-\subsection*{Equations}
-
-\subsection*{Lists}
-
-\subsection*{Figures}
-
-\subsection*{Tables}
-
-\subsection*{Code examples}
 
 %------------------------------------------------
 
@@ -309,11 +288,6 @@ Especially if the requirements are not precise or not coherent between themselve
 Use the Discussion section to objectively evaluate your work, do not just put praise on everything you did, be critical and exposes flaws and weaknesses of your solution. You can also explain what you would do differently if you would be able to start again and what upgrades could be done on the project in the future.
 
 
-%------------------------------------------------
-
-\section*{Acknowledgments}
-
-Here you can thank other persons (advisors, colleagues ...) that contributed to the successful completion of your project.
 
 
 %----------------------------------------------------------------------------------------
