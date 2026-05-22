@@ -27,7 +27,7 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
-def evaluate(raw_llm=False, with_ollama=False):
+def evaluate(raw_llm=False, with_ollama=True):
     if not with_ollama:
         from src.services.llm import init_llm
         init_llm()

@@ -136,7 +136,7 @@ def run_inference(
                 "repeat_penalty": repetition_penalty,
             }
         },
-        timeout=120
+        timeout=600
     )
 
     if response.status_code != 200:
