@@ -11,7 +11,11 @@ from src.config import PDF_ROOT
 
 # WEBSITE = "https://www.auto-brochures.com/audi.html"
 WEBSITE = "https://www.auto-brochures.com"  # Spletna stran, iz katere rabimo podatke
-BRANDS = ["audi", "bmw", "buick","cadillac", "chevrolet", "chrysler", "dodge", "ford", "honda", "hyundai", "infiniti", "jeep", "kia", "land rover", "lexus", "mazda", "mercedes-benz", "mini", "mitsubishi", "nissan", "porsche", "ram", "subaru", "toyota", "volkswagen", "volvo"]  # Seznam vseh znamk, za katere zelimo pdf
+
+# BRANDS = ["audi", "bmw", "buick","cadillac", "chevrolet", "chrysler", "dodge", "ford", "honda", "hyundai", "infiniti", "jeep", "kia", "land rover", "lexus", "mazda", "mercedes-benz", "mini", "mitsubishi", "nissan", "porsche", "ram", "subaru", "toyota", "volkswagen", "volvo"]  # Seznam vseh znamk, za katere zelimo pdf
+BRANDS = ["audi", "bmw", "ford", "mazda"]  # Seznam vseh znamk, za katere zelimo pdf
+
+
 ONLY_RECENT = False  # Ce je True, potem downloadamo samo najnovejso letnico
 MIN_YEAR = None  # Minimalna letnica za download (ce je None, potem downloadamo vse, -1 pomeni samo najnovejso) 
 
@@ -38,13 +42,17 @@ def get_brand_model_year(pdf_name):
     return brand, model, year
     
 
-def get_data(brands, min_year=None, only_latest=False):
-    download_all = min_year is None and only_latest is False
+def get_data(brands, min_year=None, only_latest=True):
+    # download_all = min_year is None and only_latest is False
+    download_all = False
 
     for brand in brands:
+        print(brand)
         os.makedirs(f"{PDF_ROOT}/{brand}", exist_ok=True)
 
     for brand in brands:
+
+        print(brand)
 
         website = WEBSITE + "/" + brand + ".html"
 
@@ -69,8 +77,8 @@ def get_data(brands, min_year=None, only_latest=False):
 
                 dicti[model].append((model_year, href))
 
-        if download_all:
-            return
+        # if download_all:
+        #     return
         
         # filter by year
         for model, versions in dicti.items():
@@ -174,7 +182,8 @@ def main():
 
     # default to download if no subcommand provided
     if args.command is None or args.command == "download":
-        get_data(brands=args.brands, min_year=args.min_year, only_latest=args.latest)
+        print(BRANDS)
+        get_data(brands=BRANDS)
         return
 
     if args.command == "filter":

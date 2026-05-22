@@ -2,6 +2,7 @@ import sys
 import os
 import argparse
 import json
+from contextlib import contextmanager
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 if PROJECT_ROOT not in sys.path:
@@ -15,11 +16,24 @@ from src.main import init_rag
 from src.ingestion.embedder import init_embedder
 
 
-def evaluate(raw_llm=False):
-    # init_llm()
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
+
+def evaluate(raw_llm=False, with_cpu=True):
+    if not with_cpu:
+        from src.services.llm import init_llm
+        init_llm()
 
     if raw_llm:
-        print("Running in raw LLM mode (no RAG context or database recommendations)")
+        print()
+        # print("Running in raw LLM mode (no RAG context or database recommendations)")
     else:
         init_rag()
 
@@ -43,36 +57,38 @@ def evaluate(raw_llm=False):
                 # query = input("You: ").strip()
                 query = question
                 if query.lower() in ("exit", "quit"):
-                    print("\nGoodbye!")
+                    # print("\nGoodbye!")
                     break
 
                 if not query:
                     continue
 
-                print("\n[Processing...]")
+                # print("\n[Processing...]")
                 if raw_llm:
-                    result = handle_query_raw_llm(query)
+                    with suppress_stdout():
+                        result = handle_query_raw_llm(query)
                 else:
-                    result = handle_query(query)
+                    with suppress_stdout():
+                        result = handle_query(query)
 
-                print("\nResponse:")
-                print(result.get("response", "No response generated"))
+                # print("\nResponse:")
+                # print(result.get("response", "No response generated"))
 
                 top_answers = []
 
                 if not raw_llm:
-                    print("\nTop Recommendations:")
+                    # print("\nTop Recommendations:")
                     for i, rec in enumerate(result.get("recommendations", [])[:3], 1):
                         brand = rec.get("brand", "Unknown")
                         model = rec.get("model", "")
-                        print(f"  {i}. {brand} {model}\n")
+                        # print(f"  {i}. {brand} {model}\n")
                         top_answers.append(str(brand) + " " + str(model))
 
             except KeyboardInterrupt:
-                print("\n\nInterrupted. Goodbye!")
+                # print("\n\nInterrupted. Goodbye!")
                 break
             except Exception as e:
-                print(f"Error: {e}")
+                # print(f"Error: {e}")
                 import traceback
                 traceback.print_exc()
 
@@ -80,7 +96,7 @@ def evaluate(raw_llm=False):
             f_result.write(json.dumps(expected))
             f_result.write(json.dumps(top_answers) + "\n")
 
-            print(result.get("recommendations", [])[:3], 1)
+            print(result)
 
     f_result.close()
 
