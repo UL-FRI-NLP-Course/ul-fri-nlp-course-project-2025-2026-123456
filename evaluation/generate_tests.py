@@ -87,11 +87,17 @@ def generate_test():
 
         cars = query_unique_models_by_constraints(constraint)
 
+        all_cars = []
+        for car in cars:
+            brand = car.get("brand", "Unknown")
+            model = car.get("model", "")
+            all_cars.append(f"{brand} {model}".strip())
+
         print(cars)
 
         row = {
             "question": query,
-            "expected_answer": cars,
+            "expected_answer": all_cars,
             "expected_docs": []
         }
 
