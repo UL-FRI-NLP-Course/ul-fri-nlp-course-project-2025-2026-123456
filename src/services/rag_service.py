@@ -37,6 +37,11 @@ def generate_prompt(query: str, parsed: dict, ranked: list, context: list):
         f"{INSTRUCTIONS}"
     )
 
+    print(f"top cars:\n{top_cars}")
+    print(f"rec text:\n{rec_text}")
+    print(f"ctx text:\n{ctx_text}")
+    print(f"final prompt:\n{prompt}")
+
     return prompt
 
 # POSSIBLE PROMPT ker un zgori si loh mal zmisluje 
@@ -87,12 +92,19 @@ def handle_query(query: str, state: ConversationState):
     #print(f"FINAL STATE")
     #state.print_info()
 
+    print("BEFORE RETRIEVE CANDIDATES")
+
     # Step 3: Retrieve FAISS context based on parsed query terms
     candidates, context = retrieve_candidates(state.query_parsed, state.queries, k=10)
+
+    print("BEFORE FAISS SCORES")
 
     # Step 4: Build a mapping of FAISS candidate sources to cars
     # and merge DB results with FAISS scores
     faiss_scores = {c.get("source", ""): c.get("score", 0.0) for c in candidates}
+
+    print("BEFORE FOR LOOP")
+
 
     # Combine DB cars with FAISS scores
     # (cars from DB are already filtered by constraints)
@@ -104,6 +116,8 @@ def handle_query(query: str, state: ConversationState):
     # If no DB matches, broaden to the full CarAPI dataset.
     if not state.db_cars_list:
         state.db_cars_list = get_all_carapi_cars(limit=20)
+
+    print("BEFORE RANK CARS")
 
     # Step 5: Rank combined results
     ranked = rank_cars(state.db_cars_list, state.query_parsed)

@@ -269,6 +269,7 @@ def make_conversation(query: str, state: ConversationState):
 
 
     """
+
     if state.merge_parsed: 
         # get a new parsed and merge it with previous one 
         parsed_new = parse_query(state.queries[-1], state.conversation_round)
