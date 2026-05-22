@@ -17,3 +17,4 @@ bitsandbytes
 hf_xet
 einops
 peft
+rapidfuzz

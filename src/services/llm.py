@@ -25,8 +25,6 @@ def get_model(model_name: str = HF_LLM_MODEL) -> tuple[AutoModelForCausalLM, Aut
     if _model is not None and model_name == _model_name:
         return _model, _tokenizer
     model_name = HF_LLM_MODEL
-    print(HF_LLM_MODEL)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     _tokenizer = AutoTokenizer.from_pretrained(
         model_name,

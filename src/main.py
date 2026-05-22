@@ -59,16 +59,16 @@ def main(raw_llm=False):
 
             else:
                 # LLM + RAG
-                state, top_cars = handle_query(query, state)
+                state, car_recommendations = handle_query(query, state)
 
                 print("\nResponse:")
-                print(state.llm_response)
+                print(state.llm_responses[-1])
 
                 # check whether already we print reommendations 
                 # or did we ask user to provide additional info
                 if state.status == "READY":
                     print("\nTop Recommendations:")
-                    for i, rec in enumerate(top_cars[:3], 1):
+                    for i, rec in enumerate(car_recommendations[:10], 1):
                         brand = rec.get("brand", "Unknown")
                         model = rec.get("model", "")
                         print(f"  {i}. {brand} {model}\n")
