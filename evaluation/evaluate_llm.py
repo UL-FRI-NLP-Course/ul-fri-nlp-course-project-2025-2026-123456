@@ -27,10 +27,11 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
-def evaluate(raw_llm=False, with_ollama=False):
+def evaluate(raw_llm=False, single_turn=True, with_ollama=False):
     if not with_ollama:
         from src.services.llm import init_llm
         init_llm()
+        print("init done")
 
     if raw_llm:
         print()
@@ -39,7 +40,7 @@ def evaluate(raw_llm=False, with_ollama=False):
         init_rag()
 
     state = ConversationState()
-    state.single_turn = True
+    state.single_turn = single_turn
 
     input_path = "evaluation/eval_tests.jsonl"
     output_path = "evaluation/eval_results.jsonl"
@@ -83,7 +84,7 @@ def evaluate(raw_llm=False, with_ollama=False):
                 else:
                     with suppress_stdout():
                         state = ConversationState()
-                        state.single_turn = True
+                        state.single_turn = single_turn
                         state, response = handle_query(query, state)
 
                 # print("\nResponse:")
@@ -191,5 +192,26 @@ def evaluate(raw_llm=False, with_ollama=False):
 
     f_result.close()
 
+
 if __name__ == "__main__":
-    evaluate()
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--raw-llm",
+        action="store_true",
+        help="Run without RAG (pure LLM mode)"
+    )
+
+    parser.add_argument(
+        "--single-turn",
+        action="store_true",
+        help="Run LLM in stateless single-turn mode (no conversation, no memory)"
+    )
+
+    args = parser.parse_args()
+
+    evaluate(
+        raw_llm=args.raw_llm,
+        single_turn=args.single_turn
+    )
