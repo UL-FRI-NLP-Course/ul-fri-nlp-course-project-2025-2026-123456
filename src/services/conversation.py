@@ -1,3 +1,4 @@
+from config import COLUMN_EXTRACTION_LIMIT
 from src.services.parser import parse_query
 from src.db.carapi_queries import (
     query_carapi_by_constraints,
@@ -270,11 +271,11 @@ def make_conversation(query: str, state: ConversationState):
     # merge preferences
     if not state.merge_parsed:
         # ce je to prvi krog pol sam sparsamo
-        parsed = parse_query(query, state.conversation_round)
+        parsed = parse_query(query, limit=COLUMN_EXTRACTION_LIMIT)
         state.merge_parsed = True   # in zdej tega ne spreminjam vec 
     else: 
         # otherwise we need to merge all preferences
-        parsed_new = parse_query(state.queries[-1], state.conversation_round)
+        parsed_new = parse_query(state.queries[-1], limit=COLUMN_EXTRACTION_LIMIT)
         parsed = merge_parsed(state.query_parsed, parsed_new)
 
     state.query_parsed = parsed

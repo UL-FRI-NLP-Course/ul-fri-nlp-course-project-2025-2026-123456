@@ -1,4 +1,3 @@
-from src.services.parser import parse_query
 from src.services.retrival import create_conversation_text, retrieve_candidates
 from src.services.llm import generate_response
 from src.db.carapi_queries import (

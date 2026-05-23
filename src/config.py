@@ -9,7 +9,8 @@ DB_URL = os.getenv("DATABASE_URL")
 
 # Embeddings and RAG
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "Qwen/Qwen3-Embedding-0.6B")
-COLUMN_EMBEDDING_THRESHOLD = float(os.getenv("COLUMN_EMBEDDING_THRESHOLD", "0.49"))
+COLUMN_EMBEDDING_THRESHOLD = float(os.getenv("COLUMN_EMBEDDING_THRESHOLD", "0.40"))
+COLUMN_EXTRACTION_LIMIT = int(os.getenv("COLUMN_EXTRACTION_LIMIT", "5"))
 
 HF_LLM_MODEL = os.getenv("HF_LLM_MODEL", "Qwen/Qwen2.5-14B-Instruct")
 HF_LLM_PARSING_MODEL = os.getenv("HF_LLM_PARSING_MODEL", "Qwen/Qwen2.5-14B-Instruct")

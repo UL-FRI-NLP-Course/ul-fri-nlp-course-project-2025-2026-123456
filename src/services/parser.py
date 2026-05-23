@@ -123,43 +123,25 @@ If the value cannot be extracted with high confidence, return null for both valu
     
     return prompt
 
-def extract_related_columns(query):
+def extract_related_columns(query, limit=5):
     embeddings, metadata = load_column_embeddings(embeddings_path=CARAPI_COLUMN_EMBEDDINGS_FILE)
 
     query_embedding = embed_query(query)
 
     scores = np.dot(embeddings, query_embedding)
 
+    sorted_indices = np.argsort(scores)[::-1]
     accepted_indices = np.where(scores > COLUMN_EMBEDDING_THRESHOLD)[0]
-    related_columns = [metadata[idx].name for idx in accepted_indices]
+
+    limit_accepted = [idx for idx in accepted_indices if idx in sorted_indices[:limit]]
+
+    related_columns = [metadata[idx].name for idx in limit_accepted]
 
     return related_columns
 
 
-def parse_query(query: str, zacasni_idx: int = 1):
-
-    # if zacasni_idx == 1:
-
-    #     sample = [
-    #         {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'},
-    #         {'name': 'seats', 'value': None, 'constraint': 'min'},
-    #         {'name': 'fuel_type', 'value': 'electric', 'constraint': 'equal'},
-    #         {'name': 'combined_l_per_100km', 'value': None, 'constraint': None},
-    #     ]
-
-    # elif zacasni_idx == 2:
-    #     sample = [
-    #         {'name': 'seats', 'value': '5', 'constraint': 'min'}
-    #     ]
-    # else: 
-
-    #     sample = [
-    #         {'name': 'combined_l_per_100km', 'value': None, 'constraint': None}
-    #     ]
-        
-    # return sample
-
-    related_columns = extract_related_columns(query)
+def parse_query(query: str, limit: int = 5):
+    related_columns = extract_related_columns(query, limit=limit)
 
     column_fields = []
 
@@ -180,32 +162,32 @@ def format_parsed_response(response):
 if __name__ == "__main__":
     init_llm()
 
-    query = "I want an affordable familiy SUV with 7 seats."
+    query = "I am looking for an SUV from Mazda with a maximum of 5 seats."
     print(f"Query: {query}")
-    response = parse_query(query)
+    response = parse_query(query, limit=5)
     format_parsed_response(response)
     print()
 
-    query = "I am on a strict budget, so I am looking for something under 20k. USD"
-    print(f"Query: {query}")
-    response = parse_query(query)
-    format_parsed_response(response)
-    print()
+    # query = "I am on a strict budget, so I am looking for something under 20k. USD"
+    # print(f"Query: {query}")
+    # response = parse_query(query)
+    # format_parsed_response(response)
+    # print()
 
-    query = "I want a sporty coupe with at least 300 hp and rear wheel drive."
-    print(f"Query: {query}")
-    response = parse_query(query)
-    format_parsed_response(response)
-    print()
+    # query = "I want a sporty coupe with at least 300 hp and rear wheel drive."
+    # print(f"Query: {query}")
+    # response = parse_query(query)
+    # format_parsed_response(response)
+    # print()
 
-    query = "I'm looking for a spacious SUV under 30.000 USD with low consumption, preferably electric or hybrid, for family road trips. It should have at least 5 seats and an automatic transmission."
-    print(f"Query: {query}")
-    response = parse_query(query)
-    format_parsed_response(response)
-    print()
+    # query = "I'm looking for a spacious SUV under 30.000 USD with low consumption, preferably electric or hybrid, for family road trips. It should have at least 5 seats and an automatic transmission."
+    # print(f"Query: {query}")
+    # response = parse_query(query)
+    # format_parsed_response(response)
+    # print()
 
-    query = "Truck with good towing capacity, preferably diesel, for off-road and road trips, budget up to 50k."
-    print(f"Query: {query}")
-    response = parse_query(query)
-    format_parsed_response(response)
-    print()
+    # query = "Truck with good towing capacity, preferably diesel, for off-road and road trips, budget up to 50k."
+    # print(f"Query: {query}")
+    # response = parse_query(query)
+    # format_parsed_response(response)
+    # print()
