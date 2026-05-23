@@ -148,9 +148,9 @@ def evaluate(raw_llm=False, with_ollama=False):
                     #         len(predicted_set) > 0
                     #         and expected_set == predicted_set[0]
                     # ),
-                    "top3_correct": (
-                            expected_set in predicted_set
-                    ),
+                    # "top3_correct": (
+                    #         expected_set in predicted_set
+                    # ),
                     "intersection": list(intersection),
                     "correct_count": correct,
                     "extra_count": extra,
@@ -174,18 +174,18 @@ def evaluate(raw_llm=False, with_ollama=False):
     print("Evaluation Complete")
     print("========================")
 
-    if total > 0:
-        print(f"Samples: {total}")
-        print(f"Top-1 Accuracy: {correct_top1 / total:.2%}")
-        print(f"Top-3 Accuracy: {correct_top3 / total:.2%}")
-
-    summary = {
-        "summary": {
-            "samples": total,
-            "top1_accuracy": correct_top1 / total if total > 0 else 0,
-            "top3_accuracy": correct_top3 / total if total > 0 else 0,
-        }
-    }
+    # if total > 0:
+    #     print(f"Samples: {total}")
+    #     print(f"Top-1 Accuracy: {correct_top1 / total:.2%}")
+    #     print(f"Top-3 Accuracy: {correct_top3 / total:.2%}")
+    #
+    # summary = {
+    #     "summary": {
+    #         "samples": total,
+    #         "top1_accuracy": correct_top1 / total if total > 0 else 0,
+    #         "top3_accuracy": correct_top3 / total if total > 0 else 0,
+    #     }
+    # }
 
     # f_result.write(json.dumps(summary) + "\n")
 
