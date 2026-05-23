@@ -279,6 +279,9 @@ def make_conversation(query: str, state: ConversationState):
 
     state.query_parsed = parsed
 
+    print("State query parsed:")
+    print(state.query_parsed)
+
 
 
 

@@ -55,8 +55,16 @@ def main():
                     all_val.append(val)
                     all_wanted.append(wanted)
 
+                brand = predicted_car.split()[0]
+                model = " ".join(predicted_car.split()[1:])
+                if brand.lower() == "merecdes" or brand.lower() == "land":
+                    brand = str(brand) + " " + str(predicted_car.split[1])
+                    model = " ".join(predicted_car.split()[2:])
 
-                car_dict_predicted = get_car_data(predicted_car.split() , all_con)
+                # print(brand)
+                # print(model)
+
+                car_dict_predicted = get_car_data([brand, model], all_con)
                 f_constraint.write("Dejanski podatki(" + str(predicted_car) + ") : " + str(car_dict_predicted) + "\n")
                 f_constraint.write("Zahteve: " + str(constraints) + "\n")
                 f_constraint.write("\n")

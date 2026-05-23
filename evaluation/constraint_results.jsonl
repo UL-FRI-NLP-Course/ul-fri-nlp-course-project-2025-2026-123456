@@ -26,55 +26,55 @@ Nasledji test:
 Dejanski podatki(Audi A3) : {'make': 'Audi', 'msrp': 33300.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A3 Quattro) : {'make': 'Audi', 'msrp': 33300.0}
+Dejanski podatki(Audi A3 Quattro) : {'make': 'Audi', 'msrp': 36500.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A3 Sportback e-tron) : {'make': 'Audi', 'msrp': 33300.0}
+Dejanski podatki(Audi A3 Sportback e-tron) : {'make': 'Audi', 'msrp': 39500.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
 Dejanski podatki(Audi A4) : {'make': 'Audi', 'msrp': 37400.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A4 Quattro) : {'make': 'Audi', 'msrp': 37400.0}
+Dejanski podatki(Audi A4 Quattro) : {'make': 'Audi', 'msrp': 40900.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A4 allroad) : {'make': 'Audi', 'msrp': 37400.0}
+Dejanski podatki(Audi A4 allroad) : {'make': 'Audi', 'msrp': 44600.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A5 Quattro) : {}
+Dejanski podatki(Audi A5 Quattro) : {'make': 'Audi', 'msrp': 42900.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A5 Sportback) : {}
+Dejanski podatki(Audi A5 Sportback) : {'make': 'Audi', 'msrp': 42900.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
 Dejanski podatki(Audi A6) : {'make': 'Audi', 'msrp': 49700.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A6 Quattro) : {'make': 'Audi', 'msrp': 49700.0}
+Dejanski podatki(Audi A6 Quattro) : {'make': 'Audi', 'msrp': 54900.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A6 allroad) : {'make': 'Audi', 'msrp': 49700.0}
+Dejanski podatki(Audi A6 allroad) : {'make': 'Audi', 'msrp': 65900.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A7 Quattro) : {}
+Dejanski podatki(Audi A7 Quattro) : {'make': 'Audi', 'msrp': 69700.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A7 Sportback) : {}
+Dejanski podatki(Audi A7 Sportback) : {'make': 'Audi', 'msrp': 69000.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A8 Quattro) : {}
+Dejanski podatki(Audi A8 Quattro) : {'make': 'Audi', 'msrp': 85200.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
 Dejanski podatki(Audi Q3) : {'make': 'Audi', 'msrp': 34700.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi Q3 Quattro) : {'make': 'Audi', 'msrp': 34700.0}
+Dejanski podatki(Audi Q3 Quattro) : {'make': 'Audi', 'msrp': 35000.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
 Dejanski podatki(Audi Q5) : {'make': 'Audi', 'msrp': 43300.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
-Dejanski podatki(Audi Q5 PHEV) : {'make': 'Audi', 'msrp': 43300.0}
+Dejanski podatki(Audi Q5 PHEV) : {'make': 'Audi', 'msrp': 52900.0}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'msrp', 'value': 15000, 'constraint': 'max'}]
 
 Dejanski podatki(Audi Q7) : {'make': 'Audi', 'msrp': 54800.0}
@@ -167,7 +167,7 @@ Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'b
 Dejanski podatki(Audi A3 Quattro) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A3 Sportback e-tron) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Dejanski podatki(Audi A3 Sportback e-tron) : {'make': 'Audi', 'body_type': 'Hatchback', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
 Dejanski podatki(Audi A4) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
@@ -176,13 +176,13 @@ Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'b
 Dejanski podatki(Audi A4 Quattro) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A4 allroad) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Dejanski podatki(Audi A4 allroad) : {'make': 'Audi', 'body_type': 'Wagon', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A5 Quattro) : {}
+Dejanski podatki(Audi A5 Quattro) : {'make': 'Audi', 'body_type': 'Coupe', 'seats': 4}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A5 Sportback) : {}
+Dejanski podatki(Audi A5 Sportback) : {'make': 'Audi', 'body_type': 'Hatchback', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
 Dejanski podatki(Audi A6) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
@@ -191,16 +191,16 @@ Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'b
 Dejanski podatki(Audi A6 Quattro) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A6 allroad) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
+Dejanski podatki(Audi A6 allroad) : {'make': 'Audi', 'body_type': 'Wagon', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A7 Quattro) : {}
+Dejanski podatki(Audi A7 Quattro) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A7 Sportback) : {}
+Dejanski podatki(Audi A7 Sportback) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
-Dejanski podatki(Audi A8 Quattro) : {}
+Dejanski podatki(Audi A8 Quattro) : {'make': 'Audi', 'body_type': 'Sedan', 'seats': 5}
 Zahteve: [{'name': 'make', 'value': 'Mazda', 'constraint': 'equal'}, {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'}, {'name': 'seats', 'value': 5, 'constraint': 'max'}]
 
 Dejanski podatki(Audi Q3) : {'make': 'Audi', 'body_type': 'SUV', 'seats': 5}
