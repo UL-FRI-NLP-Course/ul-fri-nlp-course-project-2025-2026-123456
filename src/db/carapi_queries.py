@@ -191,6 +191,9 @@ def query_carapi_by_constraints(constraints: list[dict], limit=20, unique_models
 
 def query_unique_models_by_constraints(constraints: list[dict], limit=20):
     clauses, params = build_filter_clauses(constraints)
+
+    if not clauses:
+        return []
     where_clause = " AND ".join(clauses)
 
     sql = "SELECT DISTINCT make AS brand, model FROM carapi_cars"
@@ -283,17 +286,8 @@ def get_unique_values_from_column(column_name: str, limit: int = None):
 
 
 if __name__ == "__main__":
-    constraints = [
-        {'name': 'make', 'value': ['BMW', 'Mercedes'], 'constraint': 'equal'},
-        {'name': 'model', 'value': None, 'constraint': None},
-        {'name': 'msrp', 'value': [50000, 60000], 'constraint': 'range'}, 
-        {'name': 'body_type', 'value': 'coupe', 'constraint': 'equal'}
-    ]
 
-    constraints2 = [
-        {'name': 'seats', 'value': 7, 'constraint': 'equal'},
-        {'name': 'body_type', 'value': 'SUV', 'constraint': 'equal'},
-    ]
+    constraints2 = [{'name': 'make', 'value': None, 'constraint': None}, {'name': 'model', 'value': None, 'constraint': None}, {'name': 'body_type', 'value': None, 'constraint': None}, {'name': 'doors', 'value': None, 'constraint': None}, {'name': 'width_cm', 'value': None, 'constraint': None}]
 
     cars = query_unique_models_by_constraints(constraints2)
     for car in cars:

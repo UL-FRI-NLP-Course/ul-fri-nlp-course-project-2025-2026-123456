@@ -280,11 +280,6 @@ def make_conversation(query: str, state: ConversationState):
 
     state.query_parsed = parsed
 
-    print("State query parsed:")
-    print(state.query_parsed)
-
-
-
 
     # Step 2: Query DB for cars matching constraints
     db_cars = query_carapi_by_constraints(state.query_parsed, limit=20, unique_models=True)
