@@ -79,9 +79,8 @@ We evaluate the proposed system against multiple variants. LLM such as Qwen and 
 data retrieval represents the baseline. More advanced comparison represent 
 a non-conversational version of the proposed recommender system.
 In all cases the proposed recommender system outperformed the others.
-
-\textbf{TODO! Dodaj dejanske rezultate al neki}
 }
+%\textbf{TODO! Dodaj dejanske rezultate al neki}
 
 %----------------------------------------------------------------------------------------
 
@@ -221,11 +220,62 @@ The system then combines both retrieved sets of car candidates and filters them 
 
 
 
-\subsubsection*{Evaluation methods}
+\section*{Evaluation methods and Results}
 
-\textbf{Attribute embeddings evaluation.} We designed a benchamrk to evaluate the performance of different embedding models for the task of identifying relevant attributes from user queries. We created a dataset of 40 user queries, each manually annotated with the relevant attributes. We then tested several embedding models, from Qwen, BAAI-bge, nomic-ai, GTE, Google's gemma and jinaai. To rank the models we measured Spearman's correlation to measure how well the model's ranking of attributes agrees with the ground truth. We also measured the separation with Cohen's \(d\), since we want a large distance between the relevant and irrelevant attributes, and finally we also measured the F1 score, which was also optimized with different thresholds. Results of the benchmark are ranked embedding models with their optimal thresholds. The best model was \texttt{Qwen3-Embedding-4B}, with \texttt{jina-embeddings-v5-text-small} in the close second place. We however used \texttt{\textbf{Qwen3-Embedding-0.6B}} which ranked 3rd but had the best performance compared to its speed.
+We designed two types of tests: the ones that evaluate the embedded model, 
+and the ones that evaluate the final system. 
 
-\textbf{TODO: add LLM's names} 
+\subsubsection*{Attribute embeddings evaluation}
+
+We designed a benchmark to evaluate the performance of different embedding models for 
+the task of identifying relevant attributes from user queries. We created a dataset of 
+40 user queries, each manually annotated with the relevant attributes. We then tested 
+several embedding models, from Qwen, BAAI-bge, nomic-ai, GTE, Google's gemma and jinaai. 
+To rank the models we measured Spearman's correlation to measure how well the model's 
+ranking of attributes agrees with the ground truth (Agreement). We also measured the separation with 
+Cohen's \(d\), since we want a large distance between the relevant and irrelevant attributes,
+and finally we also measured the F1 score, which was also optimized with different thresholds.
+ 
+\vspace{5pt}
+\noindent
+Results of evaluations of the embedded models with their optimal thresholds are shown in the
+Table \ref{tab:benchmark results}. In  the end, Qwen3-Embedding-0.6B model 
+was chosen since it was the best trade-off between its performance and speed.
+% \texttt{\textbf{Qwen3-Embedding-0.6B}}
+\begin{table}[H]
+\resizebox{1.0 \linewidth}{!}
+{\begin{tabular}{| c | c || c c c c |}
+
+\hline
+Model & Threshold &  Agreement & Separation & F1  & \makecell{Final \\ score} \\ 
+\hline
+\makecell{Qwen/Qwen3 \\ Embedding-4B}  &  0.57 &  0.40 & 1.65 & 0.57 & 0.87 \\
+\hline
+\makecell{jinaai/jina-embeddings \\ v5-text-small}  &  0.33 &  0.39 & 1.61 & 0.52 & 0.84 \\
+\hline
+\makecell{Qwen/Qwen3 \\ Embedding-0.6B}  &  0.49 &  0.40 & 1.58 & 0.53 & 0.84 \\
+\hline
+\makecell{google/embeddinggemma \\ 300m}  &  0.29 &  0.39 & 1.59 & 0.51 & 0.83 \\
+\hline
+\makecell{jinaai/jina-embeddings \\ v5-text-nano}   &  0.33 & 0.38 & 1.55 & 0.54 & 0.83 \\
+\hline
+ ... & ... & ... & ... & ... &  \\
+\hline
+
+
+\end{tabular}}
+\caption{
+    Results of performances of different embedding models
+}
+\label{tab:benchmark results}
+\end{table}
+\FloatBarrier
+
+
+\subsubsection*{Model evaluation}
+
+
+%\textbf{TODO: add LLM's names} 
 
 Evaluating language models is challenging because their outputs are not 
 fully deterministic, especially when they are in conversation mode. We 
@@ -250,36 +300,24 @@ After the conversation ends, we store the final set of recommended cars and
 compare it to the expected set obtained from the structured database using 
 the manually parsed query. We also compare that to two baselines
 
-The third evaluation tests whether the RAG component is working correctly.
-After each recommendation, we manually check whether the returned cars 
-satisfy the user's stated preferences.
-
-
-
-
-%------------------------------------------------
-
-\section*{Results}
-
-Example of one conversation: 
-"   ".
-
-
+\vspace{5pt}
 \noindent
 Results of the two tests:
 
 \begin{table}[H]
 \resizebox{1.0 \linewidth}{!}
-{\begin{tabular}{| c | c c c c c |}
+{\begin{tabular}{| c | c c c |}
 
 \hline
-Model & \makecell{number of \\ correctly retrieved \\ cars} & \makecell{number of \\ missed \\ cars} & precision  & recall & F1 \\ 
+%Model & \makecell{number of \\ correctly retrieved \\ cars} & \makecell{number of \\ missed \\ cars} & precision  & recall & F1 \\ 
+Model & \makecell{number of \\ correctly retrieved \\ cars} & \makecell{number of \\ missed \\ cars} & recall \\ \hline
+\makecell{baseline LLM \\ Qwen}  &  2  & 15 & 0.12 \\
 \hline
-baseline LLM  &  1 &  1 & 1 & 1 & 1 \\
+\makecell{CRS \\ non-conversational \\ Mistral}  &  0  & 17 & 0.00 \\
 \hline
-\makecell{CRS \\ non-conversational}  &  1 &  1 & 1 & 1 & 1 \\
+\makecell{CRS \\ non-conversational \\ Qwen}  &  14 & 3  & 0.82 \\
 \hline
-\makecell{CRS \\ conversational}   &  1 &  1 & 1 & 1 & 1 \\
+\makecell{CRS \\ conversational \\ Qwen}  &  14 & 3  & 0.82 \\
 \hline
 
 \end{tabular}}
@@ -292,12 +330,131 @@ baseline LLM  &  1 &  1 & 1 & 1 & 1 \\
 
 
 
+The third evaluation tests whether the RAG component is working correctly.
+After each recommendation, we manually check whether the returned cars 
+satisfy the user's stated preferences.
+
+
+\begin{table}[H]
+\resizebox{1.0 \linewidth}{!}
+{\begin{tabular}{| c | c c c  |}
+
+\hline
+Model & \makecell{number of user's \\ preferences} & \makecell{number of satisfied \\ user's preferences} & precentage \\ 
+\hline
+baseline LLM  &  5 &  3 & 0.6  \\
+\hline
+\makecell{CRS \\ non-conversational}  &  5 &  5 & 1.0  \\
+\hline
+\makecell{CRS \\ conversational}   &  5 &  5 & 1.0  \\
+\hline
+
+\end{tabular}}
+\caption{
+    Results of the third evaluation tests
+}
+\label{tab:CRS results constraints}
+\end{table}
+\FloatBarrier
+
+
+
+%------------------------------------------------
+
+
+
+
+\subsubsection*{Example conversation}
+
+We also present one of the example conversation flow 
+between user and our system:
+
+\vspace{3pt}
+\noindent
+\underline{User:} I am looking for an affordable family SUV with 7 seats.
+
+\noindent
+\underline{Assistant:} To help narrow down your options, could you please specify if you prefer a particular make or model? Additionally, do you have any requirements regarding the fuel type or the seating arrangement like second-row captain's chairs versus a bench seat?
+
+\vspace{3pt}
+\noindent
+\underline{User:} I do not have a brand or model preference, but I would like to have a diesel engine.
+
+\noindent
+\underline{Assistant:} 
+Given your preference for a diesel engine and need for a 7-seater SUV, I recommend focusing 
+on the Audi Q7, Chevrolet Suburban, and Chevrolet Tahoe. These models balance affordability:
+
+\begin{enumerate}
+    \item **Audi Q7**: Offers robust performance and luxurious interiors suitable for a family. However, note that finding a diesel variant might be limited due to market availability, typically preferring gasoline engines. 
+    \item **Chevrolet Suburban**: Provides ample space and reliable diesel option, ideal for large families needing extra room. It's known for durability and comfort, making long journeys easier.
+    \item **Chevrolet Tahoe**: Another strong contender offering a comfortable ride and sufficient seating capacity. Like the Suburban, it has a diesel version which ensures good fuel efficiency and lower running costs over time.
+\end{enumerate}
+
+\noindent
+While the Mercedes-Benz models offer premium features, they tend to be more expensive and less common 
+in diesel versions. The Land Rover Discovery is also a great choice, though it primarily uses petrol 
+engines and is priced higher than the others mentioned here.
+
+\noindent
+For your specific needs, the **Suburban** and **Tahoe** stand out due to their reliability, spaciousness, 
+and availability of diesel engines, balancing practicality and cost-effectiveness well.
+
+\noindent
+Top Recommendations:
+
+\begin{enumerate}[itemsep=0pt, topsep=0pt]
+    \item Audi Q7
+    \item Land Rover Discovery
+    \item Mercedes-Benz GL-Class
+    \item Mercedes-Benz GLS-Class
+    \item Chevrolet Suburban
+    \item Chevrolet Tahoe
+\end{enumerate}
 
 %------------------------------------------------
 
 \section*{Discussion}
 
-Use the Discussion section to objectively evaluate your work, do not just put praise on everything you did, be critical and exposes flaws and weaknesses of your solution. You can also explain what you would do differently if you would be able to start again and what upgrades could be done on the project in the future.
+As seen in the table \ref{tab:CRS results}, the proposed recommender system 
+outperforms the baseline LLM across all evaluation metrics. However, the results 
+reflect the advantage of the conversational system, as it achieves the same performance as non-conversational.
+That is actually expected and as a positive indication. We gave to non-conversational CRS 
+a query, and to conversational CRS part by part of this query. This suggests that the 
+conversation mechanism is functioning as intended
+
+\vspace{3pt}
+\noindent
+We also evaluated alternative models within the same pipeline. 
+One of them is a smaller model Mistral. This one had a lot of trouble just by 
+parsing the query, which led to even worse performance compared to the baseline.
+
+\vspace{3pt}
+\noindent
+From the Table \ref{tab:CRS results constraints} we can once again observe 
+that CRS Systems outperformed baseline LLM. It is worth noting 
+that evaluating the baseline LLM is very challenging, since iz may 
+hallucinated some of the car models or cars technical details.
+
+\vspace{3pt}
+There are many areas in this project that can be improved. A major limitation is
+the strong dependency on the underlying LLM, particularly for query parsing.
+Bigger models could improve both robustness and accuracy, while on the other 
+hand smaller models
+currently fail to operate reliably within the proposed pipeline.
+
+
+\vspace{3pt}
+Another limitation of the system is its computational cost and latency, which 
+mainly happens due to the conversational loop and the embedding-based
+retrieval step.
+
+
+\vspace{3pt}
+Overall, the system satisfies the initial requirements by providing a
+functional conversational recommendation flow with mostly consistent outputs.
+The results indicate that the proposed hybrid approach improves over a
+baseline LLM and confirms that conversational recommender systems work well in this domain.
 
 
 
